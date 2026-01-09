@@ -9,7 +9,8 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
-        if ($user->user_type === 'admin') {
+
+        if ($user->isAdmin()) {
             return Inertia::render('Admin/Dashboard');
         }
 

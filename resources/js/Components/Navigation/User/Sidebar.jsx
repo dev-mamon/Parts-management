@@ -64,33 +64,35 @@ export default function Sidebar({ isCollapsed }) {
     return (
         <aside
             className={`flex flex-col h-full bg-white border-r transition-all duration-300 ${
-                isCollapsed ? "w-[100px]" : "w-[300px]"
+                isCollapsed ? "w-[112px]" : "w-[320px]"
             }`}
         >
             {/* Logo */}
             <div
-                className={`flex items-center py-10 ${
-                    isCollapsed ? "justify-center" : "px-10"
+                className={`flex items-center py-8 ${
+                    isCollapsed ? "justify-center" : "pl-10 pr-6"
                 }`}
             >
                 <img
                     src="img/logo.png"
                     alt="Logo"
-                    className={`transition-all ${isCollapsed ? "h-8" : "h-12"}`}
+                    className={`transition-all duration-300 ${
+                        isCollapsed ? "h-7" : "h-11"
+                    }`}
                 />
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 px-4 space-y-6 overflow-y-auto">
+            <nav className="flex-1 pl-6 pr-4 space-y-5 overflow-y-auto">
                 {MENU.map((group) => (
                     <div key={group.title}>
                         {!isCollapsed && (
-                            <p className="px-4 mb-4 text-[11px] font-bold text-gray-400 tracking-widest uppercase">
+                            <p className="pl-2 mb-3 text-[10px] font-semibold text-gray-400 tracking-widest uppercase">
                                 {group.title}
                             </p>
                         )}
 
-                        <div className="space-y-1">
+                        <div className="space-y-1.5">
                             {group.items.map(({ label, icon: Icon, path }) => {
                                 const active = url.startsWith(path);
 
@@ -98,29 +100,30 @@ export default function Sidebar({ isCollapsed }) {
                                     <Link
                                         key={label}
                                         href={path}
-                                        className={`group relative flex items-center py-4 rounded-[22px] transition-all ${
-                                            isCollapsed
-                                                ? "justify-center"
-                                                : "gap-4 px-6"
-                                        } ${
-                                            active
-                                                ? "bg-red-50 text-red-600 font-bold"
-                                                : "text-gray-500 hover:text-red-600 hover:bg-gray-50"
-                                        }`}
+                                        className={`
+                                    group flex items-center transition-all duration-200
+                                    ${
+                                        isCollapsed
+                                            ? "justify-center px-5"
+                                            : "gap-3 pl-8 pr-5"
+                                    }
+                                    py-3.5
+                                    rounded-[20px]
+                                    ${
+                                        active
+                                            ? "bg-[#fceceb] text-[#a80000] font-semibold border-l-[6px] border-[#a80000] shadow-sm"
+                                            : "text-gray-500 hover:text-red-600 hover:bg-gray-50"
+                                    }
+                                    hover:scale-[1.02]
+                                `}
                                     >
-                                        {/* Active Indicator */}
-                                        {active && (
-                                            <span className="absolute left-0 top-1/2 h-[60%] w-[6px] -translate-y-1/2 rounded-r-full bg-red-600" />
-                                        )}
-
-                                        {/* Icon inherits text color */}
                                         <Icon
-                                            size={22}
-                                            className="text-current"
+                                            size={20}
+                                            className="text-current transition-transform duration-200 group-hover:scale-110"
                                         />
 
                                         {!isCollapsed && (
-                                            <span className="text-[16px]">
+                                            <span className="text-[15px] tracking-wide">
                                                 {label}
                                             </span>
                                         )}
@@ -132,9 +135,14 @@ export default function Sidebar({ isCollapsed }) {
                 ))}
 
                 {/* Logout */}
-                <button className="flex items-center gap-4 px-6 py-4 mt-4 w-full text-red-600 font-bold hover:bg-red-50 rounded-[22px] transition-all">
-                    <LogOut size={22} className="text-current" />
-                    {!isCollapsed && <span>Log Out</span>}
+                <button className="group flex items-center gap-3 pl-8 pr-5 py-3.5 mt-4 w-full text-red-600 font-semibold hover:bg-red-50 rounded-[20px] transition-all duration-200 hover:scale-[1.02]">
+                    <LogOut
+                        size={20}
+                        className="transition-transform duration-200 group-hover:scale-110"
+                    />
+                    {!isCollapsed && (
+                        <span className="text-[15px]">Log Out</span>
+                    )}
                 </button>
             </nav>
         </aside>

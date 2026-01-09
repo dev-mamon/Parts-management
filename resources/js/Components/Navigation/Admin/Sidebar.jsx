@@ -1,78 +1,150 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import {
     LayoutDashboard,
-    Package,
-    History,
-    Tags,
+    ShoppingCart,
+    RefreshCw,
+    Users,
+    Tag,
+    FileText,
+    BarChart2,
     ChevronRight,
     ChevronDown,
     X,
 } from "lucide-react";
 
 const Sidebar = ({ isCollapsed, isMobileOpen, setIsMobileOpen }) => {
-    const [isScrollingVisible, setIsScrollingVisible] = useState(false);
-    const [openMenus, setOpenMenus] = useState({ products: false });
-    const scrollTimeoutRef = useRef(null);
     const { url } = usePage();
 
-    const toggleMenu = (menu) => {
-        setOpenMenus((prev) => ({ ...prev, [menu]: !prev[menu] }));
+    // Track which menus with children are open
+    const [openMenus, setOpenMenus] = useState({ products: false });
+
+    const toggleMenu = (key) => {
+        setOpenMenus((prev) => ({ ...prev, [key]: !prev[key] }));
     };
 
+    // Menu configuration
+    const menuItems = [
+        {
+            label: "Dashboard",
+            path: "/dashboard",
+            icon: <LayoutDashboard size={20} />,
+        },
+        { label: "Orders", path: "/orders", icon: <ShoppingCart size={20} /> },
+        {
+            label: "Categories",
+            path: "/categories",
+            icon: <ShoppingCart size={20} />,
+        },
+        { label: "Returns", path: "/returns", icon: <RefreshCw size={20} /> },
+        { label: "All leads", path: "/leads", icon: <Users size={20} /> },
+        {
+            label: "Sales - B2C",
+            path: "/sales-b2c",
+            icon: <BarChart2 size={20} />,
+        },
+        {
+            label: "Customers - B2B",
+            path: "/customers-b2b",
+            icon: <Users size={20} />,
+        },
+        {
+            label: "Products",
+            path: "/products",
+            icon: <Tag size={20} />,
+            children: [
+                { label: "All Products", path: "/products" },
+                { label: "Add Product", path: "/products/create" },
+            ],
+            key: "products",
+        },
+        {
+            label: "Create Invoice",
+            path: "/invoice/create",
+            icon: <FileText size={20} />,
+        },
+        {
+            label: "Analytics",
+            path: "/analytics",
+            icon: <BarChart2 size={20} />,
+        },
+    ];
+
     return (
-        <>
-            {/* Mobile Overlay */}
-            {isMobileOpen && (
-                <div
-                    className="fixed inset-0 bg-black/50 z-[60] lg:hidden transition-opacity"
-                    onClick={() => setIsMobileOpen(false)}
-                />
-            )}
-
-            <nav
-                className={`
-                    fixed inset-y-0 left-0 z-[70] flex flex-col bg-white border-r border-gray-100 transition-all duration-300 transform
-                    ${
-                        isMobileOpen
-                            ? "translate-x-0 w-[280px]"
-                            : "-translate-x-full lg:translate-x-0"
-                    }
-                    lg:relative
-                    ${isCollapsed ? "lg:w-20" : "lg:w-[260px]"}
-                    overflow-y-auto overflow-x-hidden p-3 space-y-6 custom-sidebar-scrollbar
-                `}
+        <div className="flex flex-col h-full bg-white">
+            {/* Logo Section */}
+            <div
+                className={`flex items-center h-20 shrink-0 transition-all duration-300 ${
+                    isCollapsed ? "justify-center" : "px-6"
+                }`}
             >
-                {/* Main Section */}
-                <section>
-                    {(!isCollapsed || isMobileOpen) && (
-                        <p className="text-[11px] font-bold text-[#1B2838] uppercase tracking-wider mb-3 px-3">
-                            Main
-                        </p>
-                    )}
-                    <div className="space-y-1">
-                        <SidebarItem
-                            icon={<LayoutDashboard size={19} />}
-                            label="Dashboard"
-                            path="/dashboard"
-                            active={url === "/dashboard"}
-                            isCollapsed={isCollapsed && !isMobileOpen}
-                        />
-                    </div>
-                </section>
+                <img
+                    src="/img/logo.png"
+                    alt="Logo"
+                    className={`transition-all duration-300 object-contain ${
+                        isCollapsed ? "h-8 w-8" : "h-10"
+                    }`}
+                />
+                {isMobileOpen && (
+                    <button
+                        onClick={() => setIsMobileOpen(false)}
+                        className="lg:hidden ml-auto p-2 text-gray-400"
+                    >
+                        <X size={20} />
+                    </button>
+                )}
+            </div>
 
-                {/* Inventory Section */}
-                <section className="border-gray-100">
-                    <SidebarItem
-                        icon={<Tags size={19} />}
-                        label="Category"
-                        path="/categories"
-                        active={url.startsWith("/categories")}
-                        isCollapsed={isCollapsed && !isMobileOpen}
-                    />
-                </section>
+            {/* Navigation */}
+            <nav className="flex-1 overflow-y-auto p-3 space-y-4 custom-sidebar-scrollbar">
+                {!isCollapsed && (
+                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3 px-3">
+                        Main Menu
+                    </p>
+                )}
+
+                <div className="space-y-1">
+                    {menuItems.map((item) =>
+                        item.children ? (
+                            <SidebarItem
+                                key={item.key}
+                                icon={item.icon}
+                                label={item.label}
+                                path={item.path}
+                                isCollapsed={isCollapsed}
+                                hasChild
+                                isOpen={openMenus[item.key]}
+                                onClick={() => toggleMenu(item.key)}
+                            >
+                                {!isCollapsed &&
+                                    item.children.map((child) => (
+                                        <Link
+                                            key={child.path}
+                                            href={child.path}
+                                            className={`block pl-10 py-2 rounded-lg text-sm ${
+                                                url === child.path
+                                                    ? "bg-orange-50 text-orange-600"
+                                                    : "text-slate-600 hover:bg-gray-50 hover:text-orange-600"
+                                            }`}
+                                        >
+                                            {child.label}
+                                        </Link>
+                                    ))}
+                            </SidebarItem>
+                        ) : (
+                            <SidebarItem
+                                key={item.path}
+                                icon={item.icon}
+                                label={item.label}
+                                path={item.path}
+                                active={url.startsWith(item.path)}
+                                isCollapsed={isCollapsed}
+                            />
+                        )
+                    )}
+                </div>
             </nav>
-        </>
+        </div>
     );
 };
 
@@ -85,64 +157,63 @@ const SidebarItem = ({
     hasChild,
     isOpen,
     onClick,
+    children,
 }) => {
+    const classes = `flex items-center ${
+        isCollapsed ? "justify-center" : "gap-3 px-3"
+    } py-2.5 rounded-xl transition-all duration-200 group relative ${
+        active
+            ? "bg-orange-50 text-orange-600"
+            : "text-slate-600 hover:bg-gray-50 hover:text-orange-600"
+    } cursor-pointer`;
+
     const content = (
-        <div className="flex items-center gap-3">
-            <span
-                className={`shrink-0 ${
-                    active
-                        ? "text-[#F97316]"
-                        : "text-[#55606C] group-hover:text-[#F97316]"
+        <>
+            <div
+                className={`shrink-0 transition-colors ${
+                    active ? "text-orange-600" : "group-hover:text-orange-600"
                 }`}
             >
                 {icon}
-            </span>
+            </div>
             {!isCollapsed && (
-                <span className="text-[14px] font-medium whitespace-nowrap">
-                    {label}
-                </span>
+                <span className="text-[14px] font-medium">{label}</span>
             )}
-        </div>
-    );
 
-    const classes = `flex items-center ${
-        isCollapsed ? "justify-center" : "justify-between"
-    } p-2.5 rounded-lg cursor-pointer transition-all group ${
-        active
-            ? "bg-[#FFF7ED] text-[#F97316]"
-            : "text-[#55606C] hover:bg-[#F8F9FA] hover:text-[#F97316]"
-    }`;
+            {isCollapsed && (
+                <div className="absolute left-full ml-4 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-[100] whitespace-nowrap">
+                    {label}
+                </div>
+            )}
+
+            {hasChild && !isCollapsed && (
+                <div className="ml-auto">
+                    {isOpen ? (
+                        <ChevronDown size={14} />
+                    ) : (
+                        <ChevronRight size={14} />
+                    )}
+                </div>
+            )}
+        </>
+    );
 
     if (hasChild && !isCollapsed) {
         return (
-            <div onClick={onClick} className={classes}>
-                {content}
-                {isOpen ? (
-                    <ChevronDown size={14} />
-                ) : (
-                    <ChevronRight size={14} />
-                )}
+            <div>
+                <div onClick={onClick} className={classes}>
+                    {content}
+                </div>
+                {isOpen && children}
             </div>
         );
     }
+
     return (
         <Link href={path} className={classes}>
             {content}
         </Link>
     );
 };
-
-const SubItem = ({ label, path, active }) => (
-    <Link
-        href={path}
-        className={`block p-2 text-[13px] rounded-md transition-all ${
-            active
-                ? "text-[#F97316] font-semibold"
-                : "text-[#55606C] hover:text-[#F97316] hover:bg-gray-50"
-        }`}
-    >
-        • {label}
-    </Link>
-);
 
 export default Sidebar;

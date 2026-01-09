@@ -4,7 +4,7 @@ import { Upload, X, CheckCircle2, AlertCircle } from "lucide-react";
 const FileUpload = ({
     data,
     setData,
-    errors, // লারাভেলের errors অবজেক্ট এখানে আসবে
+    errors,
     clearErrors, // Inertia clearErrors ফাংশন
     field = "image",
     label = "Product Image",

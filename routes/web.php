@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\Admin\Category\IndexController as CategoryController;
+use App\Http\Controllers\Admin\Product\IndexController as ProductController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
+// category and sub category
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -17,6 +20,15 @@ Route::get('/', function () {
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/parts', [DashboardController::class, 'parts'])->name('parts');
+
+    // category
+    Route::delete('categories/bulk-destroy', [CategoryController::class, 'bulkDestroy'])
+        ->name('categories.bulk-destroy');
+    Route::resource('categories', CategoryController::class);
+
+    // products
+    Route::resource('products', ProductController::class);
+
 });
 
 Route::middleware('auth')->group(function () {
