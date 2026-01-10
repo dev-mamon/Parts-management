@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Product;
 
+use App\Exports\ProductsExport;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductStoreRequest;
@@ -14,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class IndexController extends Controller
 {
@@ -27,9 +29,28 @@ class IndexController extends Controller
                 'files',
                 'fitments',
             ])
+            // Advanced Search Filter
             ->when($request->search, function ($query, $search) {
-                $query->where('description', 'like', "%{$search}%")
-                    ->orWhere('sku', 'like', "%{$search}%");
+                $query->where(function ($q) use ($search) {
+                    // Search in SKU or Description (Keyword)
+                    $q->where('description', 'like', "%{$search}%")
+                        ->orWhere('sku', 'like', "%{$search}%")
+                      // Search in related Part Numbers or Partslink
+                        ->orWhereHas('partsNumbers', function ($partQuery) use ($search) {
+                            $partQuery->where('number', 'like', "%{$search}%");
+                        });
+                });
+            })
+            // Category and Sub-category filters (Name based)
+            ->when($request->category, function ($query, $categoryName) {
+                $query->whereHas('category', function ($q) use ($categoryName) {
+                    $q->where('name', $categoryName);
+                });
+            })
+            ->when($request->sub_category, function ($query, $subCategoryName) {
+                $query->whereHas('subCategory', function ($q) use ($subCategoryName) {
+                    $q->where('name', $subCategoryName);
+                });
             })
             ->latest()
             ->paginate($request->per_page ?? 10)
@@ -37,8 +58,15 @@ class IndexController extends Controller
 
         return Inertia::render('Admin/Product/Index', [
             'products' => $products,
-            'filters' => $request->only(['search', 'per_page']),
+            'categories' => Category::all(['id', 'name']),
+            'subCategories' => SubCategory::all(['id', 'name', 'category_id']),
+            'filters' => $request->only(['search', 'category', 'sub_category', 'per_page']),
         ]);
+    }
+
+    public function export()
+    {
+        return Excel::download(new ProductsExport, 'products_list.xlsx');
     }
 
     public function create()

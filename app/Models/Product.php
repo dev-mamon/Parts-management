@@ -40,6 +40,6 @@ class Product extends Model
 
     public function partsNumbers()
     {
-        return $this->belongsTo(PartsNumber::class);
+        return $this->hasMany(PartsNumber::class, 'product_id');
     }
 }
