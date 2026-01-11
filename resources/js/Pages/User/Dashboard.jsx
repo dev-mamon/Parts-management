@@ -21,10 +21,6 @@ export default function Dashboard() {
                             Orders, Today
                         </p>
                     </div>
-                    <div className="bg-white px-4 py-2 rounded-lg border border-gray-200 text-sm text-gray-600 flex items-center gap-2">
-                        <span className="opacity-70">📅</span> 12/20/2025 -
-                        12/26/2025
-                    </div>
                 </div>
             </div>
         </UserLayout>

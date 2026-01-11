@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import Header from "../Components/Navigation/Admin/Header";
 import Sidebar from "../Components/Navigation/Admin/Sidebar";
-import { ChevronLeft, Menu, X } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 
 export default function AdminLayout({ children }) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
 
+    // sdiebar width control logic
     const showFullSidebar = !isCollapsed || isHovered;
 
     return (
-        <div className="flex h-screen bg-[#F7F7F7] overflow-hidden font-sans">
+        <div className="flex h-screen bg-[#F9FAFB] overflow-hidden font-sans">
+            {/* Mobile Overlay */}
             {isMobileOpen && (
                 <div
                     className="fixed inset-0 bg-black/40 z-[55] lg:hidden transition-opacity duration-300"
@@ -19,11 +21,11 @@ export default function AdminLayout({ children }) {
                 />
             )}
 
-            {/* Sidebar Section */}
+            {/* Sidebar Container */}
             <aside
                 onMouseEnter={() => isCollapsed && setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
-                className={`fixed inset-y-0 left-0 z-[60] bg-white border-r border-gray-200 transition-all duration-300 ease-in-out flex flex-col
+                className={`fixed inset-y-0 left-0 z-[60] bg-white border-r border-gray-100 transition-all duration-300 ease-in-out flex flex-col
                     ${
                         isMobileOpen
                             ? "translate-x-0 w-64 shadow-2xl"
@@ -31,10 +33,10 @@ export default function AdminLayout({ children }) {
                     }
                     ${showFullSidebar ? "lg:w-64" : "lg:w-20"}`}
             >
-                {/* Desktop Toggle Button */}
+                {/* Mobile Close Button */}
                 <button
                     onClick={() => setIsCollapsed(!isCollapsed)}
-                    className="hidden lg:flex absolute -right-3 top-5 z-[70] w-6 h-6 bg-orange-500 text-white rounded-full items-center justify-center shadow-md hover:bg-orange-600 transition-all"
+                    className="hidden lg:flex absolute -right-3 top-6 z-[70] w-6 h-6 bg-orange-500 text-white rounded-full items-center justify-center shadow-md hover:bg-orange-600 transition-all"
                 >
                     <ChevronLeft
                         size={14}
@@ -44,68 +46,25 @@ export default function AdminLayout({ children }) {
                     />
                 </button>
 
-                {/* Mobile Close Button */}
-                <button
-                    onClick={() => setIsMobileOpen(false)}
-                    className="lg:hidden absolute right-4 top-5 p-1 text-gray-500"
-                >
-                    <X size={20} />
-                </button>
-
-                <div className="h-16 flex items-center px-5 border-b border-gray-100 shrink-0">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center shrink-0 shadow-sm">
-                            <span className="text-white font-bold text-lg">
-                                D
-                            </span>
-                        </div>
-
-                        <div
-                            className={`leading-tight transition-all duration-200
-                            ${
-                                showFullSidebar || isMobileOpen
-                                    ? "opacity-100 translate-x-0 visible"
-                                    : "opacity-0 -translate-x-2 invisible absolute"
-                            }`}
-                        >
-                            <span className="text-xl font-bold text-slate-800 block">
-                                Dreams
-                            </span>
-                            <span className="text-orange-500 text-[10px] font-bold uppercase tracking-tighter -mt-1 block text-right">
-                                pos
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Sidebar Navigation Items */}
-                <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
-                    <Sidebar
-                        isCollapsed={isMobileOpen ? false : !showFullSidebar}
-                    />
-                </div>
+                <Sidebar
+                    isCollapsed={!showFullSidebar}
+                    isMobileOpen={isMobileOpen}
+                    setIsMobileOpen={setIsMobileOpen}
+                />
             </aside>
 
             {/* Main Content Area */}
             <div
                 className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${
-                    isCollapsed ? "lg:pl-20" : "lg:pl-64"
-                } pl-0`}
+                    showFullSidebar ? "lg:pl-64" : "lg:pl-20"
+                }`}
             >
-                <div className="flex items-center bg-white border-b border-gray-100 lg:border-none w-full shrink-0">
-                    <button
-                        onClick={() => setIsMobileOpen(true)}
-                        className="p-4 lg:hidden text-gray-600 hover:text-orange-500 transition-colors"
-                    >
-                        <Menu size={24} />
-                    </button>
-                    <div className="flex-1">
-                        <Header />
-                    </div>
-                </div>
+                {/* Header: Navigation Bar */}
+                <Header onMenuClick={() => setIsMobileOpen(true)} />
 
-                <main className="flex-1 overflow-y-auto overflow-x-hidden bg-[#F9FAFB]">
-                    <div className="w-full mx-auto">{children}</div>
+                {/* Main Scrollable Content */}
+                <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+                    <div className="max-w-[1600px] mx-auto">{children}</div>
                 </main>
             </div>
         </div>

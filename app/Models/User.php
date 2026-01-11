@@ -33,6 +33,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    public function isAdmin(): bool
+    {
+        return trim($this->user_type) === 'admin';
+    }
+
     // generate username from first name and last name an  id
     protected static function booted()
     {

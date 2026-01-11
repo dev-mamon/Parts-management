@@ -1,78 +1,236 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import {
     LayoutDashboard,
-    Package,
-    History,
-    Tags,
+    ShoppingCart,
+    RefreshCw,
+    Users,
+    Tag,
+    FileText,
+    BarChart2,
     ChevronRight,
-    ChevronDown,
+    Settings,
+    PlusCircle,
+    List,
+    UserCircle,
+    Mail,
+    CreditCard,
     X,
 } from "lucide-react";
 
 const Sidebar = ({ isCollapsed, isMobileOpen, setIsMobileOpen }) => {
-    const [isScrollingVisible, setIsScrollingVisible] = useState(false);
-    const [openMenus, setOpenMenus] = useState({ products: false });
-    const scrollTimeoutRef = useRef(null);
     const { url } = usePage();
+    const [openMenus, setOpenMenus] = useState({
+        products: false,
+        settings: false,
+    });
 
-    const toggleMenu = (menu) => {
-        setOpenMenus((prev) => ({ ...prev, [menu]: !prev[menu] }));
+    const toggleMenu = (key) => {
+        setOpenMenus((prev) => ({ ...prev, [key]: !prev[key] }));
     };
 
+    useEffect(() => {
+        menuItems.forEach((item) => {
+            if (
+                item.children &&
+                item.children.some((child) => url.startsWith(child.path))
+            ) {
+                setOpenMenus((prev) => ({ ...prev, [item.key]: true }));
+            }
+        });
+    }, [url]);
+
+    const menuItems = [
+        {
+            label: "Dashboard",
+            path: "/dashboard",
+            icon: <LayoutDashboard size={18} />,
+        },
+        { label: "Orders", path: "/orders", icon: <ShoppingCart size={18} /> },
+        {
+            label: "Categories",
+            path: "/categories",
+            icon: <List size={18} />,
+        },
+        { label: "Returns", path: "/returns", icon: <RefreshCw size={18} /> },
+        { label: "All leads", path: "/leads", icon: <Users size={18} /> },
+        {
+            label: "Sales - B2C",
+            path: "/sales-b2c",
+            icon: <BarChart2 size={18} />,
+        },
+        {
+            label: "Customers - B2B",
+            path: "/customers-b2b",
+            icon: <Users size={18} />,
+        },
+        {
+            label: "Products",
+            path: "/products",
+            icon: <Tag size={18} />,
+            key: "products",
+            children: [
+                {
+                    label: "All Products",
+                    path: "/products",
+                    icon: <List size={14} />,
+                },
+                {
+                    label: "Add Product",
+                    path: "/products/create",
+                    icon: <PlusCircle size={14} />,
+                },
+            ],
+        },
+        {
+            label: "Blogs",
+            path: "/blogs",
+            icon: <Tag size={18} />,
+            key: "blogs",
+            children: [
+                {
+                    label: "All Blogs",
+                    path: "/blogs",
+                    icon: <List size={14} />,
+                },
+                {
+                    label: "Add Blog",
+                    path: "/blogs/create",
+                    icon: <PlusCircle size={14} />,
+                },
+            ],
+        },
+        {
+            label: "Create Invoice",
+            path: "/invoice/create",
+            icon: <FileText size={18} />,
+        },
+        {
+            label: "Analytics",
+            path: "/analytics",
+            icon: <BarChart2 size={18} />,
+        },
+        {
+            label: "Settings",
+            path: "/settings",
+            icon: <Settings size={18} />,
+            key: "settings",
+            children: [
+                {
+                    label: "Profile Settings",
+                    path: "/profile-settings",
+                    icon: <UserCircle size={14} />,
+                },
+                {
+                    label: "Account Settings",
+                    path: "/account-settings",
+                    icon: <UserCircle size={14} />,
+                },
+                {
+                    label: "Email Settings",
+                    path: "/email-settings",
+                    icon: <Mail size={14} />,
+                },
+                {
+                    label: "Payment Settings",
+                    path: "/payment-settings",
+                    icon: <CreditCard size={14} />,
+                },
+            ],
+        },
+    ];
+
     return (
-        <>
-            {/* Mobile Overlay */}
-            {isMobileOpen && (
-                <div
-                    className="fixed inset-0 bg-black/50 z-[60] lg:hidden transition-opacity"
-                    onClick={() => setIsMobileOpen(false)}
-                />
-            )}
-
-            <nav
-                className={`
-                    fixed inset-y-0 left-0 z-[70] flex flex-col bg-white border-r border-gray-100 transition-all duration-300 transform
-                    ${
-                        isMobileOpen
-                            ? "translate-x-0 w-[280px]"
-                            : "-translate-x-full lg:translate-x-0"
-                    }
-                    lg:relative
-                    ${isCollapsed ? "lg:w-20" : "lg:w-[260px]"}
-                    overflow-y-auto overflow-x-hidden p-3 space-y-6 custom-sidebar-scrollbar
-                `}
+        <div className="flex flex-col h-full bg-[#fcfcfc] border-r border-gray-100">
+            {/* Logo Section */}
+            <div
+                className={`flex items-center h-20 shrink-0 ${
+                    isCollapsed ? "justify-center" : "px-6"
+                }`}
             >
-                {/* Main Section */}
-                <section>
-                    {(!isCollapsed || isMobileOpen) && (
-                        <p className="text-[11px] font-bold text-[#1B2838] uppercase tracking-wider mb-3 px-3">
-                            Main
-                        </p>
-                    )}
-                    <div className="space-y-1">
-                        <SidebarItem
-                            icon={<LayoutDashboard size={19} />}
-                            label="Dashboard"
-                            path="/dashboard"
-                            active={url === "/dashboard"}
-                            isCollapsed={isCollapsed && !isMobileOpen}
-                        />
-                    </div>
-                </section>
+                <img
+                    src="/img/logo.png"
+                    alt="Logo"
+                    className={`object-contain ${
+                        isCollapsed ? "h-8 w-8" : "h-9"
+                    }`}
+                />
+                {isMobileOpen && (
+                    <button
+                        onClick={() => setIsMobileOpen(false)}
+                        className="lg:hidden ml-auto p-2 text-gray-400"
+                    >
+                        <X size={20} />
+                    </button>
+                )}
+            </div>
 
-                {/* Inventory Section */}
-                <section className="border-gray-100">
-                    <SidebarItem
-                        icon={<Tags size={19} />}
-                        label="Category"
-                        path="/categories"
-                        active={url.startsWith("/categories")}
-                        isCollapsed={isCollapsed && !isMobileOpen}
-                    />
-                </section>
+            {/* Navigation */}
+            <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1 custom-sidebar-scrollbar">
+                {!isCollapsed && (
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4 px-2">
+                        Main Menu
+                    </p>
+                )}
+
+                <div className="space-y-1">
+                    {menuItems.map((item) => {
+                        const isActive = item.children
+                            ? item.children.some((child) => url === child.path)
+                            : url === item.path;
+
+                        return item.children ? (
+                            <SidebarItem
+                                key={item.key}
+                                icon={item.icon}
+                                label={item.label}
+                                isCollapsed={isCollapsed}
+                                hasChild
+                                active={isActive}
+                                isOpen={openMenus[item.key]}
+                                onClick={() => toggleMenu(item.key)}
+                            >
+                                {!isCollapsed && (
+                                    <div className="mt-1 space-y-1 ml-4 border-l border-gray-100">
+                                        {item.children.map((child) => (
+                                            <Link
+                                                key={child.path}
+                                                href={child.path}
+                                                className={`flex items-center gap-3 ml-4 py-2 px-3 rounded-md text-sm transition-all ${
+                                                    url === child.path
+                                                        ? "text-orange-600 font-semibold bg-orange-50/50"
+                                                        : "text-slate-500 hover:text-orange-500 hover:bg-gray-50"
+                                                }`}
+                                            >
+                                                <span
+                                                    className={`${
+                                                        url === child.path
+                                                            ? "text-orange-600"
+                                                            : "text-slate-400"
+                                                    }`}
+                                                >
+                                                    {child.icon}
+                                                </span>
+                                                {child.label}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+                            </SidebarItem>
+                        ) : (
+                            <SidebarItem
+                                key={item.path}
+                                icon={item.icon}
+                                label={item.label}
+                                path={item.path}
+                                active={isActive}
+                                isCollapsed={isCollapsed}
+                            />
+                        );
+                    })}
+                </div>
             </nav>
-        </>
+        </div>
     );
 };
 
@@ -85,64 +243,51 @@ const SidebarItem = ({
     hasChild,
     isOpen,
     onClick,
+    children,
 }) => {
-    const content = (
-        <div className="flex items-center gap-3">
-            <span
-                className={`shrink-0 ${
-                    active
-                        ? "text-[#F97316]"
-                        : "text-[#55606C] group-hover:text-[#F97316]"
+    const itemContent = (
+        <div
+            onClick={hasChild ? onClick : undefined}
+            className={`flex items-center group cursor-pointer py-2.5 rounded-lg transition-all duration-200 ${
+                isCollapsed ? "justify-center px-0" : "px-3"
+            } ${
+                active && !hasChild
+                    ? "bg-orange-50 text-orange-600"
+                    : "text-slate-600 hover:bg-gray-50 hover:text-orange-600"
+            } ${hasChild && active ? "text-orange-600 font-semibold" : ""}`}
+        >
+            <div
+                className={`shrink-0 transition-colors ${
+                    active ? "text-orange-600" : "group-hover:text-orange-600"
                 }`}
             >
                 {icon}
-            </span>
+            </div>
             {!isCollapsed && (
-                <span className="text-[14px] font-medium whitespace-nowrap">
-                    {label}
-                </span>
+                <span className="ml-3 text-[13.5px] font-medium">{label}</span>
+            )}
+
+            {hasChild && !isCollapsed && (
+                <div className="ml-auto">
+                    <ChevronRight
+                        size={14}
+                        className={`transition-transform duration-200 ${
+                            isOpen
+                                ? "rotate-90 text-orange-600"
+                                : "text-gray-400"
+                        }`}
+                    />
+                </div>
             )}
         </div>
     );
 
-    const classes = `flex items-center ${
-        isCollapsed ? "justify-center" : "justify-between"
-    } p-2.5 rounded-lg cursor-pointer transition-all group ${
-        active
-            ? "bg-[#FFF7ED] text-[#F97316]"
-            : "text-[#55606C] hover:bg-[#F8F9FA] hover:text-[#F97316]"
-    }`;
-
-    if (hasChild && !isCollapsed) {
-        return (
-            <div onClick={onClick} className={classes}>
-                {content}
-                {isOpen ? (
-                    <ChevronDown size={14} />
-                ) : (
-                    <ChevronRight size={14} />
-                )}
-            </div>
-        );
-    }
     return (
-        <Link href={path} className={classes}>
-            {content}
-        </Link>
+        <div>
+            {hasChild ? itemContent : <Link href={path}>{itemContent}</Link>}
+            {isOpen && children}
+        </div>
     );
 };
-
-const SubItem = ({ label, path, active }) => (
-    <Link
-        href={path}
-        className={`block p-2 text-[13px] rounded-md transition-all ${
-            active
-                ? "text-[#F97316] font-semibold"
-                : "text-[#55606C] hover:text-[#F97316] hover:bg-gray-50"
-        }`}
-    >
-        • {label}
-    </Link>
-);
 
 export default Sidebar;

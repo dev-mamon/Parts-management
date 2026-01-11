@@ -1,10 +1,6 @@
-// React hook for managing component state
 import { useState } from "react";
-
-// Inertia helpers for page head, links, and form handling
 import { Head, Link, useForm } from "@inertiajs/react";
 
-// Icons used in the login UI
 import {
     LucideUser,
     LucideLock,
@@ -164,7 +160,7 @@ export default function Login() {
                             </span>
                             <Link
                                 href={route("register")}
-                                className="text-black font-bold hover:underline"
+                                className="text-white font-bold hover:underline"
                             >
                                 Sign up
                             </Link>
