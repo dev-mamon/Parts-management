@@ -63,7 +63,7 @@ export default function Sidebar({ isCollapsed }) {
 
     return (
         <aside
-            className={`flex flex-col h-full bg-white border-r transition-all duration-300 ${
+            className={`flex flex-col pt-4 h-full bg-white border-r transition-all duration-300 ${
                 isCollapsed ? "w-[80px]" : "w-[280px]"
             }`}
         >
@@ -83,7 +83,7 @@ export default function Sidebar({ isCollapsed }) {
             </div>
 
             {/* Navigation - Reduced space-y from 5 to 3 */}
-            <nav className="flex-1 pl-4 pr-3 space-y-3 overflow-y-auto">
+            <nav className="flex-1 pl-4 pr-3 mt-6 space-y-3 overflow-y-auto">
                 {MENU.map((group) => (
                     <div key={group.title}>
                         {!isCollapsed && (

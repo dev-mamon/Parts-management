@@ -303,7 +303,7 @@ export default function Create({ categories, subCategories }) {
                     <div className="lg:col-span-4 space-y-6">
                         {/* Category Grid */}
                         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                            <h3 className="text-sm font-bold text-[#2D6BA4] mb-4 text-center">
+                            <h3 className="text-sm font-bold text-[#2D6BA4] mb-4 ">
                                 Category
                             </h3>
                             <div className="grid grid-cols-2 gap-2">
@@ -328,12 +328,12 @@ export default function Create({ categories, subCategories }) {
                                         {cat.name}
                                     </button>
                                 ))}
-                                <button
-                                    type="button"
-                                    className="py-2 text-[11px] font-bold rounded-md bg-[#007D42] text-white flex items-center justify-center gap-1"
+                                <Link
+                                    href={route("categories.create")}
+                                    className="py-2 px-4 text-[11px] font-bold rounded-md bg-orange-600 text-white flex items-center justify-center gap-1 shadow-sm hover:bg-[#006837] transition-all"
                                 >
                                     Add <Plus size={12} />
-                                </button>
+                                </Link>
                             </div>
                             {errors.category_id && (
                                 <p className="text-red-500 text-[11px] mt-2 text-center">
@@ -483,7 +483,7 @@ export default function Create({ categories, subCategories }) {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="col-span-2 bg-emerald-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all"
+                                className="col-span-2 bg-orange-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all"
                             >
                                 <Save size={18} />{" "}
                                 {processing

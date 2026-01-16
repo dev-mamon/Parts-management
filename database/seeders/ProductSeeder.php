@@ -12,7 +12,7 @@ class ProductSeeder extends Seeder
     {
         $products = [];
 
-        for ($i = 1; $i <= 20; $i++) {
+        for ($i = 1; $i <= 2500; $i++) {
             $products[] = [
                 'category_id' => rand(1, 5),
                 'sub_category_id' => rand(1, 5),

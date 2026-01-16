@@ -2,6 +2,7 @@ import React from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { Input } from "@/Components/ui/admin/input";
+import FileUpload from "@/Components/ui/admin/FileUpload";
 import {
     ChevronLeft,
     Save,
@@ -38,6 +39,7 @@ export default function Create() {
             categories: [
                 {
                     name: "",
+                    image: null, // Added image field
                     status: "active",
                     featured: false,
                     sub_categories: [{ name: "", status: "active" }],
@@ -51,6 +53,7 @@ export default function Create() {
                 ...data.categories,
                 {
                     name: "",
+                    image: null, // Added image field
                     status: "active",
                     featured: false,
                     sub_categories: [{ name: "", status: "active" }],
@@ -70,9 +73,13 @@ export default function Create() {
         updated[index][key] = value;
         setData("categories", updated);
 
-        // --- Live Validation Clear ---
         const errorPath = `categories.${index}.${key}`;
         if (errors[errorPath]) clearErrors(errorPath);
+    };
+
+    // Helper for FileUpload specifically for nested objects
+    const handleImageUpdate = (index, file) => {
+        updateCategory(index, "image", file);
     };
 
     const addSubCategory = (index) => {
@@ -86,7 +93,6 @@ export default function Create() {
         updated[catIdx].sub_categories[subIdx][key] = value;
         setData("categories", updated);
 
-        // --- Live Validation Clear ---
         const errorPath = `categories.${catIdx}.sub_categories.${subIdx}.${key}`;
         if (errors[errorPath]) clearErrors(errorPath);
     };
@@ -101,6 +107,7 @@ export default function Create() {
         e.preventDefault();
         post(route("categories.store"), {
             onSuccess: () => reset(),
+            forceFormData: true, // Ensuring multipart/form-data for files
         });
     };
 
@@ -156,8 +163,8 @@ export default function Create() {
                             )}
 
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                                {/* Main Category - 4 Columns */}
-                                <div className="lg:col-span-4 space-y-5 border-r border-gray-100 pr-0 lg:pr-8">
+                                {/* Main Category Section */}
+                                <div className="lg:col-span-5 space-y-5 border-r border-gray-100 pr-0 lg:pr-8">
                                     <div className="flex items-center gap-2 mb-2">
                                         <span className="w-6 h-6 rounded-full bg-[#FF9F43]/10 text-[#FF9F43] flex items-center justify-center text-[12px] font-bold">
                                             {index + 1}
@@ -173,7 +180,7 @@ export default function Create() {
                                         value={cat.name}
                                         error={
                                             errors[`categories.${index}.name`]
-                                        } // Error passed here
+                                        }
                                         onChange={(e) =>
                                             updateCategory(
                                                 index,
@@ -182,6 +189,19 @@ export default function Create() {
                                             )
                                         }
                                         className="bg-gray-50/50"
+                                    />
+
+                                    {/* --- Integrated Image Upload --- */}
+                                    <FileUpload
+                                        label="Category Image"
+                                        field={`categories.${index}.image`}
+                                        data={data}
+                                        // We pass a custom setData specifically for this index
+                                        setData={(field, value) =>
+                                            handleImageUpdate(index, value)
+                                        }
+                                        errors={errors}
+                                        clearErrors={clearErrors}
                                     />
 
                                     <div className="pt-2">
@@ -209,8 +229,8 @@ export default function Create() {
                                     </div>
                                 </div>
 
-                                {/* Sub Categories - 8 Columns */}
-                                <div className="lg:col-span-8 space-y-4">
+                                {/* Sub Categories Section */}
+                                <div className="lg:col-span-7 space-y-4">
                                     <div className="flex justify-between items-center mb-1">
                                         <h3 className="text-[14px] font-bold text-[#212B36]">
                                             Sub Categories
@@ -226,7 +246,7 @@ export default function Create() {
                                         </button>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                                         {cat.sub_categories.map(
                                             (sub, subIdx) => (
                                                 <div
@@ -257,7 +277,7 @@ export default function Create() {
                                                                 errors[
                                                                     `categories.${index}.sub_categories.${subIdx}.name`
                                                                 ]
-                                                            } // Nested error
+                                                            }
                                                             onChange={(e) =>
                                                                 updateSubCategory(
                                                                     index,

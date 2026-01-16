@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { Input } from "@/Components/ui/admin/input";
-import { cn } from "@/lib/utils";
 import {
     ChevronLeft,
     Save,
@@ -10,6 +9,8 @@ import {
     Trash2,
     PlusCircle,
     LayoutGrid,
+    Image as ImageIcon,
+    UploadCloud,
 } from "lucide-react";
 
 const ModernSwitch = ({ label, active, onClick }) => (
@@ -32,26 +33,47 @@ const ModernSwitch = ({ label, active, onClick }) => (
 );
 
 export default function Edit({ category }) {
-    // এখানে মেইন ক্যাটেগরির ডাটা দিয়ে ফর্ম ইনিশিয়ালাইজ করা হচ্ছে
-    const { data, setData, put, processing, errors, clearErrors } = useForm({
+    /** * আপনি যেহেতু Public ফোল্ডার ব্যবহার করেছেন, তাই সরাসরি পাথ চেক করছি।
+     * যদি ডাটাবেসে 'uploads/category.jpg' থাকে, তবে window.location.origin দিয়ে ফুল পাথ করা হলো।
+     */
+    const initialImage = category.image
+        ? `${window.location.origin}/${category.image}`
+        : null;
+
+    const [preview, setPreview] = useState(initialImage);
+
+    const { data, setData, post, processing, errors, clearErrors } = useForm({
+        _method: "put",
         name: category.name || "",
         status: category.status || "active",
-        featured: category.featured || false,
+        image: null,
         sub_categories:
             category.sub_categories.length > 0
                 ? category.sub_categories.map((sub) => ({
-                      id: sub.id, // ID রাখতে হবে যেন আপডেট করা যায়
+                      id: sub.id,
                       name: sub.name,
                       status: sub.status,
                   }))
                 : [{ name: "", status: "active" }],
     });
 
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setData("image", file);
+            // নতুন ফাইল সিলেক্ট করলে তৎক্ষণাৎ প্রিভিউ দেখানোর জন্য
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const updateSubCategory = (subIdx, key, value) => {
         const updated = [...data.sub_categories];
         updated[subIdx][key] = value;
         setData("sub_categories", updated);
-
         const errorPath = `sub_categories.${subIdx}.${key}`;
         if (errors[errorPath]) clearErrors(errorPath);
     };
@@ -71,7 +93,9 @@ export default function Edit({ category }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        put(route("categories.update", category.id));
+        post(route("categories.update", category.id), {
+            forceFormData: true,
+        });
     };
 
     return (
@@ -85,13 +109,10 @@ export default function Edit({ category }) {
                             <LayoutGrid className="text-[#FF9F43]" size={24} />
                             Edit Category
                         </h1>
-                        <p className="text-[13px] text-gray-500 font-medium">
-                            Modify category and its sub-categories
-                        </p>
                     </div>
                     <Link
                         href={route("categories.index")}
-                        className="flex items-center gap-2 bg-[#1B2838] text-white px-4 py-2 rounded-lg font-bold text-[13px] shadow-sm"
+                        className="flex items-center gap-2 bg-[#1B2838] text-white px-4 py-2 rounded-lg font-bold text-[13px]"
                     >
                         <ChevronLeft size={19} /> Back to List
                     </Link>
@@ -100,11 +121,69 @@ export default function Edit({ category }) {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                            {/* Main Category Section */}
                             <div className="lg:col-span-4 space-y-5 border-r border-gray-100 pr-0 lg:pr-8">
                                 <h3 className="text-[14px] font-bold text-[#212B36]">
                                     Main Category Details
                                 </h3>
+
+                                <div className="space-y-2">
+                                    <label className="text-[13px] font-bold text-[#212B36]">
+                                        Category Image
+                                    </label>
+                                    <div className="relative group border-2 border-dashed border-gray-200 rounded-xl p-4 bg-gray-50/50 min-h-[180px] flex items-center justify-center">
+                                        {preview ? (
+                                            <div className="relative h-40 w-full overflow-hidden rounded-lg">
+                                                <img
+                                                    src={preview}
+                                                    alt="Category"
+                                                    className="h-full w-full object-contain"
+                                                    onError={(e) => {
+                                                        e.target.src =
+                                                            "https://placehold.co/400x300?text=No+Image+Found";
+                                                    }}
+                                                />
+                                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <label
+                                                        htmlFor="image-upload"
+                                                        className="cursor-pointer text-white flex flex-col items-center"
+                                                    >
+                                                        <UploadCloud
+                                                            size={24}
+                                                        />
+                                                        <span className="text-xs font-bold">
+                                                            Change Image
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <label
+                                                htmlFor="image-upload"
+                                                className="flex flex-col items-center justify-center h-40 w-full cursor-pointer"
+                                            >
+                                                <ImageIcon
+                                                    className="text-gray-300 mb-2"
+                                                    size={40}
+                                                />
+                                                <span className="text-[12px] text-gray-500 font-medium">
+                                                    Upload Image
+                                                </span>
+                                            </label>
+                                        )}
+                                        <input
+                                            id="image-upload"
+                                            type="file"
+                                            className="hidden"
+                                            onChange={handleImageChange}
+                                            accept="image/*"
+                                        />
+                                    </div>
+                                    {errors.image && (
+                                        <p className="text-red-500 text-xs mt-1">
+                                            {errors.image}
+                                        </p>
+                                    )}
+                                </div>
 
                                 <Input
                                     label="Category Name"
@@ -134,7 +213,6 @@ export default function Edit({ category }) {
                                 </div>
                             </div>
 
-                            {/* Sub Categories Section */}
                             <div className="lg:col-span-8 space-y-4">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-[14px] font-bold text-[#212B36]">
@@ -160,11 +238,10 @@ export default function Edit({ category }) {
                                                 onClick={() =>
                                                     removeSubCategory(subIdx)
                                                 }
-                                                className="absolute -top-2 -right-2 bg-white text-gray-400 hover:text-red-500 rounded-full border border-gray-100 p-1.5 opacity-0 group-hover/sub:opacity-100 transition-all z-10"
+                                                className="absolute -top-2 -right-2 bg-white text-gray-400 hover:text-red-500 rounded-full border border-gray-100 p-1.5 opacity-0 group-hover/sub:opacity-100 transition-all"
                                             >
                                                 <Trash2 size={12} />
                                             </button>
-
                                             <div className="space-y-3">
                                                 <Input
                                                     placeholder="Sub-category name"
@@ -210,22 +287,15 @@ export default function Edit({ category }) {
                         </div>
                     </div>
 
-                    {/* Submit Buttons */}
                     <div className="flex justify-end gap-4">
                         <button
                             type="submit"
                             disabled={processing}
                             className="flex items-center gap-2 bg-[#FF9F43] text-white px-8 py-2.5 rounded-md hover:bg-[#e68a30] transition font-bold text-[14px] shadow-md disabled:opacity-50"
                         >
-                            <Save size={18} />{" "}
+                            <Save size={18} />
                             {processing ? "Updating..." : "Update Category"}
                         </button>
-                        <Link
-                            href={route("categories.index")}
-                            className="flex items-center gap-2 bg-[#1B2838] text-white px-8 py-2.5 rounded-md hover:bg-[#2c3e50] transition font-bold text-[14px] shadow-md"
-                        >
-                            <XCircle size={18} /> Cancel
-                        </Link>
                     </div>
                 </form>
             </div>
