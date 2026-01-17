@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo, memo, useCallback } from "react";
 import UserLayout from "@/Layouts/UserLayout";
-import { Head, usePage, router, Link } from "@inertiajs/react";
+import { Head, usePage, router } from "@inertiajs/react";
 import {
     Search,
     Star,
@@ -19,198 +19,243 @@ import {
     DropdownMenuTrigger,
 } from "@/Components/ui/dropdown-menu";
 import { Skeleton } from "@/Components/ui/skeleton";
+import { debounce } from "lodash";
 
 const cn = (...classes) => classes.filter(Boolean).join(" ");
 
+const SearchInput = memo(({ initialValue, onSearch }) => {
+    const [localValue, setLocalValue] = useState(initialValue || "");
+
+    useEffect(() => {
+        setLocalValue(initialValue || "");
+    }, [initialValue]);
+
+    const handleChange = (e) => {
+        const val = e.target.value;
+        setLocalValue(val);
+        onSearch(val);
+    };
+
+    return (
+        <div className="relative flex-1 min-w-[300px]">
+            <Search className="absolute left-4 top-3 text-red-500 w-5 h-5 pointer-events-none" />
+            <input
+                type="text"
+                value={localValue}
+                onChange={handleChange}
+                placeholder="Search description or SKU"
+                className="w-full pl-12 pr-12 py-3 rounded-full border-none shadow-sm focus:ring-2 focus:ring-orange-400 bg-white outline-none transition-all"
+            />
+            {localValue && (
+                <button
+                    onClick={() => { setLocalValue(""); onSearch(""); }}
+                    className="absolute right-4 top-3 text-gray-400 hover:text-red-500"
+                >
+                    <XCircle className="w-5 h-5" />
+                </button>
+            )}
+        </div>
+    );
+});
+
+const FilterDropdown = memo(({ label, filterKey, options, currentValue, onFilter }) => {
+    return (
+        <DropdownMenu modal={false}>
+            <DropdownMenuTrigger
+                className="bg-white px-5 py-3 rounded-full shadow-sm flex items-center gap-3 min-w-[140px] justify-between border-none hover:bg-gray-50 outline-none transition-all active:scale-95 focus:ring-0"
+            >
+                <span className="text-sm font-semibold truncate max-w-[100px]">
+                    {currentValue || label}
+                </span>
+                <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent
+                onOpenAutoFocus={(e) => e.preventDefault()}
+                onCloseAutoFocus={(e) => e.preventDefault()}
+                className="min-w-max w-[var(--radix-dropdown-menu-trigger-width)] bg-white border rounded-xl shadow-lg max-h-80 overflow-y-auto z-[100]"
+                align="start"
+            >
+                <DropdownMenuItem
+                    className="font-bold text-red-500 focus:bg-red-50 cursor-pointer"
+                    onClick={() => onFilter(filterKey, "")}
+                >
+                    All {label}s
+                </DropdownMenuItem>
+                {options.map((opt) => (
+                    <DropdownMenuItem
+                        key={opt}
+                        onClick={() => onFilter(filterKey, opt)}
+                        className="focus:bg-gray-50 cursor-pointer"
+                    >
+                        {opt}
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+});
+
+const ProductRow = memo(({ product, quantity, styles, onToggleFavorite, onQuantityChange, onAddToCart }) => {
+    const firstImage = product.files?.[0] || null;
+    return (
+        <tr className={cn(styles.rowHover, styles.accent, "transition-all group odd:bg-white even:bg-slate-50 h-[72px]")}>
+            <td className="py-2">
+                <div className="flex gap-4 items-center ms-3">
+                    <div className="relative w-4 h-14 flex items-center justify-center overflow-hidden">
+                        <div className={cn("absolute inset-0 flex items-center justify-center border-r rounded-l-md", styles.badge)}>
+                            <span className="text-[7px] font-black [writing-mode:vertical-lr] rotate-180 uppercase tracking-tighter">
+                                {product.sub_category?.name || "PART"}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-50 border flex items-center justify-center shrink-0">
+                        {firstImage ? (
+                            <img src={`/${firstImage.file_path}`} alt={product.description} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                        ) : <ImageOff className="w-5 h-5 text-slate-300" />}
+                    </div>
+                    <div
+                        onClick={() => onToggleFavorite(product.id)}
+                        className={cn("flex items-center justify-center w-8 h-8 rounded-full cursor-pointer transition-colors", product.is_favorite ? "bg-orange-100" : "bg-gray-50 hover:bg-orange-50")}
+                    >
+                        <Star className={cn("w-4 h-4 transition-all", product.is_favorite ? "fill-amber-400 text-amber-400" : "text-gray-300")} />
+                    </div>
+                </div>
+            </td>
+            <td className="px-6 py-2">
+                <h4 className="font-bold text-slate-800 text-[13px] line-clamp-1">{product.description}</h4>
+                <p className="text-[10px] text-gray-400 uppercase font-medium">
+                    {product.fitments?.[0] ? `${product.fitments[0].year_from}-${product.fitments[0].year_to} ${product.fitments[0].make} ${product.fitments[0].model}` : "General Fitment"}
+                </p>
+            </td>
+            <td className="px-2 py-2 text-sm font-semibold text-center">{product.location_id || "—"}</td>
+            <td className="px-2 py-2 text-center font-bold text-gray-400 text-xs">${product.buy_price || "0.00"}</td>
+            <td className="px-2 py-2 text-center font-bold text-slate-900">${product.list_price || "0.00"}</td>
+            <td className="px-6 py-2">
+                <div className="flex items-center gap-2 justify-end">
+                    <div className="flex items-center bg-gray-50 border rounded-lg p-0.5">
+                        <button onClick={() => onQuantityChange(product.id, -1)} className="w-7 h-7 flex items-center justify-center bg-white rounded border shadow-sm text-gray-400 hover:text-red-500"><Minus className="w-3 h-3" /></button>
+                        <span className="w-8 text-center text-[12px] font-black">{quantity}</span>
+                        <button onClick={() => onQuantityChange(product.id, 1)} className="w-7 h-7 flex items-center justify-center bg-white rounded border shadow-sm text-gray-400 hover:text-emerald-600"><Plus className="w-3 h-3" /></button>
+                    </div>
+                <button
+                    onClick={() => onAddToCart(product.id)}
+                    className={cn(
+                        "p-2.5 rounded-xl text-white shadow-sm transition-all active:scale-90",
+
+                        product.in_cart
+                            ? "bg-emerald-500 hover:bg-[#229A16]"
+                            : "bg-amber-400 hover:bg-[-[#229A16]"
+                    )}
+                >
+                    <ShoppingCart className="w-4 h-4 fill-currentColor" />
+                </button>
+                </div>
+            </td>
+        </tr>
+    );
+});
+
 export default function Index() {
-    const { auth, products, categories, filters, filterOptions } =
-        usePage().props;
-    const [search, setSearch] = useState(filters.search || "");
+    const { auth, products, categories, filters, filterOptions } = usePage().props;
     const [isLoading, setIsLoading] = useState(false);
-    const [quantities, setQuantities] = useState(
-        Object.fromEntries(products.map((p) => [p.id, 1]))
+    const [showSkeleton, setShowSkeleton] = useState(false);
+    const [quantities, setQuantities] = useState(() => Object.fromEntries(products.map((p) => [p.id, 1])));
+
+    useEffect(() => {
+        let timer;
+        if (isLoading) {
+            setShowSkeleton(true);
+        } else {
+
+            timer = setTimeout(() => setShowSkeleton(false), 800);
+        }
+        return () => clearTimeout(timer);
+    }, [isLoading]);
+
+    const hasActiveFilters = useMemo(() => {
+        return Object.entries(filters).some(([key, value]) => value !== null && value !== "" && value !== undefined);
+    }, [filters]);
+
+    const debouncedSearch = useMemo(
+        () => debounce((value) => {
+            setIsLoading(true);
+            router.get(route("parts.index"), { ...filters, search: value }, {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+                onFinish: () => setIsLoading(false)
+            });
+        }, 500),
+        [filters]
     );
 
-    // Refs para controlar os timers e evitar vazamento de memória
-    const loadingTimer = useRef(null);
-
-    const hasActiveFilters = Object.entries(filters).some(([key, value]) => {
-        return value !== null && value !== "" && value !== undefined;
-    });
-
-    /**
-     * Função auxiliar para navegar garantindo 500ms de Skeleton
-     */
-    const performNavigation = (params, options = {}) => {
+    const applyFilter = useCallback((key, value) => {
+        if (filters[key] === value) return;
         setIsLoading(true);
-        const startTime = Date.now();
-        const minDelay = 500; // Meio segundo hobe
+        router.get(route("parts.index"), { ...filters, [key]: value }, {
+            preserveState: true,
+            preserveScroll: true,
+            onFinish: () => setIsLoading(false)
+        });
+    }, [filters]);
 
-        router.get(route("parts.index"), params, {
-            ...options,
-            onFinish: () => {
-                const elapsedTime = Date.now() - startTime;
-                const remainingTime = Math.max(0, minDelay - elapsedTime);
-
-                loadingTimer.current = setTimeout(() => {
-                    setIsLoading(false);
-                    if (options.onFinish) options.onFinish();
-                }, remainingTime);
-            },
+    const clearAllFilters = () => {
+        setIsLoading(true);
+        router.get(route("parts.index"), {}, {
+            preserveState: false,
+            onFinish: () => setIsLoading(false)
         });
     };
 
+    const handleQuantityChange = useCallback((id, delta) => {
+        setQuantities(prev => ({ ...prev, [id]: Math.max(1, (prev[id] || 1) + delta) }));
+    }, []);
+
+    const handleToggleFavorite = (productId) => {
+        router.post(route("parts.favourite"), { product_id: productId }, { preserveScroll: true });
+    };
+
     const handleAddToCart = (productId) => {
-        const qty = quantities[productId] || 1;
-        router.post(
-            route("parts.to-cart"),
-            { product_id: productId, quantity: qty },
-            { preserveScroll: true }
-        );
+        router.post(route("parts.to-cart"), { product_id: productId, quantity: quantities[productId] || 1 }, { preserveScroll: true });
     };
-
-    const handleQuantityChange = (id, delta) => {
-        setQuantities((prev) => ({
-            ...prev,
-            [id]: Math.max(1, (prev[id] || 1) + delta),
-        }));
-    };
-
-    const applyFilter = (key, value) => {
-        if (filters[key] === value) return;
-        performNavigation(
-            { ...filters, [key]: value },
-            { preserveState: true, preserveScroll: true }
-        );
-    };
-
-    const clearAllFilters = () => {
-        setSearch("");
-        performNavigation({}, { preserveState: false });
-    };
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (search !== (filters.search || "")) {
-                applyFilter("search", search);
-            }
-        }, 600);
-
-        return () => {
-            clearTimeout(timer);
-            if (loadingTimer.current) clearTimeout(loadingTimer.current);
-        };
-    }, [search]);
 
     const getSubCategoryStyles = (subCatName) => {
         const name = subCatName?.toUpperCase() || "";
-        if (name.includes("ENGINE"))
-            return {
-                badge: "bg-red-100 text-red-700 border-red-200",
-                rowHover: "hover:bg-red-50/30",
-            };
-        if (name.includes("BRAKE"))
-            return {
-                badge: "bg-orange-100 text-orange-700 border-orange-200",
-                rowHover: "hover:bg-orange-50/30",
-            };
-        if (name.includes("BODY"))
-            return {
-                badge: "bg-blue-100 text-blue-700 border-blue-200",
-                rowHover: "hover:bg-blue-50/30",
-            };
-        return {
-            badge: "bg-slate-100 text-slate-700 border-slate-200",
-            rowHover: "hover:bg-slate-100",
-        };
+        if (name.includes("ENGINE")) return { badge: "bg-red-100 text-red-700 border-red-200", rowHover: "hover:bg-red-50/30", accent: "border-l-4 border-l-red-400" };
+        if (name.includes("BRAKE")) return { badge: "bg-orange-100 text-orange-700 border-orange-200", rowHover: "hover:bg-orange-50/30", accent: "border-l-4 border-l-orange-400" };
+        if (name.includes("BODY")) return { badge: "bg-blue-100 text-blue-700 border-blue-200", rowHover: "hover:bg-blue-50/30", accent: "border-l-4 border-l-blue-400" };
+        return { badge: "bg-slate-100 text-slate-700 border-slate-200", rowHover: "hover:bg-slate-100", accent: "border-l-4 border-l-slate-300" };
     };
+
+    const filterConfigs = useMemo(() => [
+        { label: "Category", key: "category", options: categories?.map(c => c.name) || [] },
+        { label: "Year", key: "year_from", options: filterOptions?.years || [] },
+        { label: "Make", key: "make", options: filterOptions?.makes || [] },
+        { label: "Model", key: "model", options: filterOptions?.models || [] },
+        { label: "Location", key: "location", options: filterOptions?.locations || [] },
+    ], [categories, filterOptions]);
 
     return (
         <UserLayout user={auth.user}>
             <Head title="Parts Dashboard" />
-            <div className="p-4 md:p-8 bg-[#F8F9FB] min-h-screen font-sans text-[#4B5563]">
+            <div className="p-4 md:p-8 bg-[#F8F9FB] min-h-screen font-sans">
+
                 {/* Filter Bar */}
                 <div className="flex flex-wrap gap-3 mb-8 items-center">
-                    <div className="relative flex-1 min-w-[300px]">
-                        <Search className="absolute left-4 top-3 text-red-500 w-5 h-5" />
-                        <input
-                            type="text"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search description or SKU"
-                            className="w-full pl-12 pr-12 py-3 rounded-full border-none shadow-sm focus:ring-1 focus:ring-orange-400 bg-white transition-all"
+                    <SearchInput initialValue={filters.search} onSearch={debouncedSearch} />
+                    {filterConfigs.map((f) => (
+                        <FilterDropdown
+                            key={f.key}
+                            label={f.label}
+                            filterKey={f.key}
+                            options={f.options}
+                            currentValue={filters[f.key]}
+                            onFilter={applyFilter}
                         />
-                        {search && (
-                            <button
-                                onClick={() => {
-                                    setSearch("");
-                                    applyFilter("search", "");
-                                }}
-                                className="absolute right-4 top-3 text-gray-400 hover:text-red-500"
-                            >
-                                <XCircle className="w-5 h-5" />
-                            </button>
-                        )}
-                    </div>
-
-                    {[
-                        {
-                            label: "Category",
-                            key: "category",
-                            options: categories.map((c) => c.name),
-                        },
-                        {
-                            label: "Year",
-                            key: "year_from",
-                            options: filterOptions.years,
-                        },
-                        {
-                            label: "Make",
-                            key: "make",
-                            options: filterOptions.makes,
-                        },
-                        {
-                            label: "Model",
-                            key: "model",
-                            options: filterOptions.models,
-                        },
-                        {
-                            label: "Location",
-                            key: "location",
-                            options: filterOptions.locations,
-                        },
-                    ].map((f) => (
-                        <DropdownMenu key={f.key}>
-                            <DropdownMenuTrigger className="bg-white px-5 py-3 rounded-full shadow-sm flex items-center gap-3 min-w-[120px] justify-between border-none hover:bg-gray-50 outline-none">
-                                <span className="text-sm font-semibold truncate">
-                                    {filters[f.key] || f.label}
-                                </span>
-                                <ChevronDown className="w-4 h-4 text-gray-400" />
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56 bg-white border rounded-xl shadow-lg max-h-80 overflow-y-auto z-50">
-                                <DropdownMenuItem
-                                    className="font-bold text-red-500"
-                                    onClick={() => applyFilter(f.key, "")}
-                                >
-                                    All {f.label}s
-                                </DropdownMenuItem>
-                                {f.options.map((opt) => (
-                                    <DropdownMenuItem
-                                        key={opt}
-                                        onClick={() => applyFilter(f.key, opt)}
-                                    >
-                                        {opt}
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
                     ))}
-
                     {hasActiveFilters && (
-                        <button
-                            onClick={clearAllFilters}
-                            className="flex items-center gap-2 px-5 py-3 rounded-full bg-red-50 text-red-600 hover:bg-red-100 font-bold text-sm border border-red-100 shadow-sm active:scale-95"
-                        >
+                        <button onClick={clearAllFilters} className="flex items-center gap-2 px-5 py-3 rounded-full bg-red-50 text-red-600 hover:bg-red-100 font-bold text-sm border border-red-100 transition-all active:scale-95">
                             <XCircle className="w-4 h-4" /> Clear
                         </button>
                     )}
@@ -218,236 +263,49 @@ export default function Index() {
 
                 {/* Table Section */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                    <div className="overflow-x-auto h-auto transition-all duration-300">
+                        <table className="w-full text-left border-collapse table-fixed">
                             <thead>
                                 <tr className="bg-[#FFF8F8] text-[11px] uppercase tracking-wider text-gray-500 border-b">
-                                    <th className="px-6 py-4 font-bold">
-                                        Image
-                                    </th>
-                                    <th className="px-6 py-4 font-bold">
-                                        Description & Fitment
-                                    </th>
-                                    <th className="px-6 py-4 font-bold text-center">
-                                        Location
-                                    </th>
-                                    <th className="px-6 py-4 font-bold text-center">
-                                        SKU
-                                    </th>
-                                    <th className="px-6 py-4 font-bold text-center">
-                                        List Price
-                                    </th>
-                                    <th className="px-6 py-4 font-bold text-center">
-                                        Your Price
-                                    </th>
-                                    <th className="px-6 py-4"></th>
+                                    <th className="px-6 py-4 font-bold w-[200px]">Image</th>
+                                    <th className="px-6 py-4 font-bold">Description & Fitment</th>
+                                    <th className="px-6 py-4 font-bold text-center w-[120px]">Location</th>
+                                    <th className="px-6 py-4 font-bold text-center w-[100px]">List Price</th>
+                                    <th className="px-6 py-4 font-bold text-center w-[100px]">Your Price</th>
+                                    <th className="px-6 py-4 w-[150px]"></th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {isLoading ? (
-                                    Array(10)
-                                        .fill(0)
-                                        .map((_, index) => (
-                                            <tr
-                                                key={index}
-                                                className="animate-pulse border-b border-gray-50 odd:bg-white even:bg-slate-100/50"
-                                            >
-                                                <td className="py-4 px-6">
-                                                    <div className="flex items-center gap-4 ms-3">
-                                                        <Skeleton className="w-4 h-14 rounded" />
-                                                        <Skeleton className="w-10 h-10 rounded-lg" />
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <Skeleton className="h-4 w-56 rounded mb-2" />
-                                                    <Skeleton className="h-3 w-32 rounded" />
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <Skeleton className="h-4 w-10 mx-auto rounded" />
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <Skeleton className="h-4 w-20 mx-auto rounded" />
-                                                </td>
-                                                <td className="px-6 py-4 text-center">
-                                                    <Skeleton className="h-4 w-16 mx-auto rounded" />
-                                                </td>
-                                                <td className="px-6 py-4 text-center">
-                                                    <Skeleton className="h-4 w-16 mx-auto rounded" />
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex justify-end gap-2">
-                                                        <Skeleton className="w-20 h-8 rounded" />
-                                                        <Skeleton className="w-9 h-9 rounded" />
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))
-                                ) : products.length > 0 ? (
-                                    products.map((product) => {
-                                        const styles = getSubCategoryStyles(
-                                            product.sub_category?.name
-                                        );
-                                        const firstImage =
-                                            product.files?.[0] || null;
+                                {showSkeleton ? (
 
-                                        return (
-                                            <tr
-                                                key={product.id}
-                                                className={cn(
-                                                    styles.rowHover,
-                                                    "transition-all group odd:bg-white even:bg-slate-50"
-                                                )}
-                                            >
-                                                <td className="py-2">
-                                                    <div className="flex gap-4 items-center ms-3">
-                                                        <div className="relative w-4 h-16 flex items-center justify-center overflow-hidden">
-                                                            <div
-                                                                className={cn(
-                                                                    "absolute inset-0 flex items-center justify-center border-r rounded-l-md",
-                                                                    styles.badge
-                                                                )}
-                                                            >
-                                                                <span className="text-[7px] font-black [writing-mode:vertical-lr] rotate-180 uppercase tracking-tighter">
-                                                                    {product
-                                                                        .sub_category
-                                                                        ?.name ||
-                                                                        "PART"}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-50 border flex items-center justify-center shrink-0">
-                                                            {firstImage ? (
-                                                                <img
-                                                                    src={`/${firstImage.file_path}`}
-                                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                                                                />
-                                                            ) : (
-                                                                <ImageOff className="w-5 h-5 text-slate-300" />
-                                                            )}
-                                                        </div>
-                                                        <div
-                                                            onClick={() =>
-                                                                router.post(
-                                                                    route(
-                                                                        "parts.favourite"
-                                                                    ),
-                                                                    {
-                                                                        product_id:
-                                                                            product.id,
-                                                                    },
-                                                                    {
-                                                                        preserveScroll: true,
-                                                                    }
-                                                                )
-                                                            }
-                                                            className={cn(
-                                                                "flex items-center justify-center w-8 h-8 rounded-full cursor-pointer transition-colors",
-                                                                product.is_favorite
-                                                                    ? "bg-orange-100"
-                                                                    : "bg-gray-50 hover:bg-orange-50"
-                                                            )}
-                                                        >
-                                                            <Star
-                                                                className={cn(
-                                                                    "w-4 h-4",
-                                                                    product.is_favorite
-                                                                        ? "fill-amber-400 text-amber-400"
-                                                                        : "text-gray-300"
-                                                                )}
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-2">
-                                                    <h4 className="font-bold text-slate-800 text-[13px] line-clamp-1">
-                                                        {product.description}
-                                                    </h4>
-                                                    <p className="text-[10px] text-gray-400 uppercase font-medium">
-                                                        {product.fitments?.[0]
-                                                            ? `${product.fitments[0].year_from}-${product.fitments[0].year_to} ${product.fitments[0].make} ${product.fitments[0].model}`
-                                                            : "General Fitment"}
-                                                    </p>
-                                                </td>
-                                                <td className="px-2 py-2 text-sm font-semibold text-center">
-                                                    {product.location_id || "—"}
-                                                </td>
-                                                <td className="px-2 py-2 text-xs font-mono text-center">
-                                                    {product.sku}
-                                                </td>
-                                                <td className="px-2 py-2 text-center font-bold text-gray-400 text-xs">
-                                                    $
-                                                    {product.buy_price ||
-                                                        "0.00"}
-                                                </td>
-                                                <td className="px-2 py-2 text-center font-bold text-slate-900">
-                                                    $
-                                                    {product.list_price ||
-                                                        "0.00"}
-                                                </td>
-                                                <td className="px-6 py-2">
-                                                    <div className="flex items-center gap-2 justify-end">
-                                                        <div className="flex items-center bg-gray-50/50 border border-gray-200 rounded-lg p-0.5 shadow-sm group-hover:border-orange-200 transition-all duration-300">
-                                                            <button
-                                                                onClick={() =>
-                                                                    handleQuantityChange(
-                                                                        product.id,
-                                                                        -1
-                                                                    )
-                                                                }
-                                                                className="flex items-center justify-center w-7 h-7 rounded-md bg-white border border-transparent shadow-sm text-gray-400 hover:text-red-500 active:scale-90 transition-all"
-                                                            >
-                                                                <Minus className="w-3 h-3 stroke-[3px]" />
-                                                            </button>
-                                                            <span className="w-8 text-center text-[12px] font-black text-slate-700 tabular-nums">
-                                                                {quantities[
-                                                                    product.id
-                                                                ] || 1}
-                                                            </span>
-                                                            <button
-                                                                onClick={() =>
-                                                                    handleQuantityChange(
-                                                                        product.id,
-                                                                        1
-                                                                    )
-                                                                }
-                                                                className="flex items-center justify-center w-7 h-7 rounded-md bg-white border border-transparent shadow-sm text-gray-400 hover:text-emerald-600 active:scale-90 transition-all"
-                                                            >
-                                                                <Plus className="w-3 h-3 stroke-[3px]" />
-                                                            </button>
-                                                        </div>
-                                                        <button
-                                                            onClick={() =>
-                                                                handleAddToCart(
-                                                                    product.id
-                                                                )
-                                                            }
-                                                            className="bg-amber-400 p-2.5 rounded-xl text-white hover:bg-amber-500 active:scale-90 transition-all shadow-sm"
-                                                        >
-                                                            <ShoppingCart className="w-4 h-4 fill-currentColor" />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })
+                                    Array.from({ length: Math.max(products.length, 5) }).map((_, index) => (
+                                        <tr key={index} className="odd:bg-white even:bg-slate-50 h-[72px]">
+                                            <td className="py-2 px-6"><div className="flex items-center gap-4"><Skeleton className="w-4 h-12 rounded" /><Skeleton className="w-10 h-10 rounded-lg" /></div></td>
+                                            <td className="px-6 py-2"><Skeleton className="h-4 w-3/4 rounded mb-2" /><Skeleton className="h-3 w-1/2 rounded" /></td>
+                                            <td className="px-6 py-2"><Skeleton className="h-4 w-10 mx-auto rounded" /></td>
+                                            <td className="px-6 py-2"><Skeleton className="h-4 w-12 mx-auto rounded" /></td>
+                                            <td className="px-6 py-2"><Skeleton className="h-4 w-12 mx-auto rounded" /></td>
+                                            <td className="px-6 py-2"><Skeleton className="w-24 h-9 rounded ml-auto" /></td>
+                                        </tr>
+                                    ))
+                                ) : products.length > 0 ? (
+                                    products.map((product) => (
+                                        <ProductRow
+                                            key={product.id}
+                                            product={product}
+                                            quantity={quantities[product.id] || 1}
+                                            styles={getSubCategoryStyles(product.sub_category?.name)}
+                                            onToggleFavorite={handleToggleFavorite}
+                                            onQuantityChange={handleQuantityChange}
+                                            onAddToCart={handleAddToCart}
+                                        />
+                                    ))
                                 ) : (
                                     <tr>
-                                        <td
-                                            colSpan="7"
-                                            className="py-32 text-center"
-                                        >
+                                        <td colSpan="6" className="py-32 text-center">
                                             <div className="flex flex-col items-center justify-center space-y-2">
                                                 <Search className="w-12 h-12 text-gray-200" />
-                                                <p className="text-gray-400 font-medium">
-                                                    No products match your
-                                                    search results.
-                                                </p>
-                                                <button
-                                                    onClick={clearAllFilters}
-                                                    className="text-red-500 text-sm font-bold hover:underline"
-                                                >
-                                                    Reset Filters
-                                                </button>
+                                                <p className="text-gray-400 font-medium">No products found.</p>
                                             </div>
                                         </td>
                                     </tr>

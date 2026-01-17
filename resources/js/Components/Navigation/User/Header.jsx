@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { router } from "@inertiajs/react";
+import { router, usePage, Link } from "@inertiajs/react";
 import {
     Search,
     ShoppingCart,
@@ -11,31 +11,31 @@ import {
 } from "lucide-react";
 
 const Header = ({ onMenuClick }) => {
+    const { props } = usePage();
+    const cartCount = props.cartCount || 0;
+    const user = props.auth.user;
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
+
+    // Unique token generator (You can also get this from backend)
+    const cartToken = btoa(user?.id + "-cart-session");
+
     const handleLogout = () => {
         router.post(route("logout"));
     };
 
-    // Close dropdown on outside click
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(e.target)
-            ) {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
                 setOpen(false);
             }
         };
-
         document.addEventListener("mousedown", handleClickOutside);
-        return () =>
-            document.removeEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
     return (
         <header className="h-24 bg-white flex items-center justify-between px-10 border-b border-gray-100">
-            {/* LEFT SECTION */}
             <div className="flex items-center gap-6">
                 <button
                     onClick={onMenuClick}
@@ -46,18 +46,15 @@ const Header = ({ onMenuClick }) => {
 
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900">
-                        Welcome back, Bay Mechanic Shop
+                        Welcome back, {user?.name || "Guest"}
                     </h1>
                     <p className="text-sm text-slate-400 mt-1">
-                        Here's what's happening with your auto parts orders
-                        today.
+                        Here's what's happening with your auto parts orders today.
                     </p>
                 </div>
             </div>
 
-            {/* RIGHT SECTION */}
             <div className="flex items-center gap-6">
-                {/* Search */}
                 <div className="relative hidden xl:block">
                     <Search
                         size={20}
@@ -70,39 +67,40 @@ const Header = ({ onMenuClick }) => {
                     />
                 </div>
 
-                {/* Icons */}
                 <div className="flex items-center gap-3">
-                    {[{ Icon: ShoppingCart }, { Icon: Bell }].map(
-                        ({ Icon }, index) => (
-                            <button
-                                key={index}
-                                className="relative p-4 rounded-full bg-gray-50 text-red-700 hover:bg-gray-100 transition"
-                            >
-                                <Icon size={22} />
-                                <span className="absolute top-3 right-3 w-3 h-3 bg-orange-400 border-2 border-white rounded-full" />
-                            </button>
-                        )
-                    )}
+                    <Link
+                        href={route('carts.index', { token: cartToken })}
+                        className="relative p-4 rounded-full bg-gray-50 text-red-700 hover:bg-gray-100 transition"
+                    >
+                        <ShoppingCart size={22} />
+                        {cartCount > 0 && (
+                            <span className="absolute top-2 right-2 min-w-[20px] h-5 px-1 flex items-center justify-center bg-orange-500 border-2 border-white rounded-full text-[10px] font-bold text-white">
+                                {cartCount}
+                            </span>
+                        )}
+                    </Link>
+
+                    <button className="relative p-4 rounded-full bg-gray-50 text-red-700 hover:bg-gray-100 transition">
+                        <Bell size={22} />
+                        <span className="absolute top-3 right-3 w-3 h-3 bg-orange-400 border-2 border-white rounded-full" />
+                    </button>
                 </div>
 
-                {/* Profile Dropdown */}
                 <div ref={dropdownRef} className="relative">
                     <div
                         onClick={() => setOpen(!open)}
                         className="flex items-center gap-3 px-4 py-2 rounded-full bg-gray-50 border border-gray-100 cursor-pointer hover:bg-gray-100 transition"
                     >
-                        <img
-                            src="https://i.pravatar.cc/150?u=jane"
-                            alt="User"
-                            className="w-12 h-12 rounded-full object-cover"
-                        />
+                        <div className="w-12 h-12 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center">
+                            <User size={24} className="text-slate-500" />
+                        </div>
 
                         <div className="leading-tight hidden md:block">
-                            <p className="text-base font-bold text-slate-900">
-                                Jane Morgan
+                            <p className="text-base font-bold text-slate-900 truncate max-w-[120px]">
+                                {user?.name}
                             </p>
-                            <p className="text-sm text-slate-500">
-                                janemorgan@gmail.com
+                            <p className="text-sm text-slate-500 truncate max-w-[120px]">
+                                {user?.email}
                             </p>
                         </div>
 
@@ -114,9 +112,8 @@ const Header = ({ onMenuClick }) => {
                         />
                     </div>
 
-                    {/* Dropdown Menu */}
                     {open && (
-                        <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden animate-fade-in">
+                        <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden z-50">
                             <button className="w-full flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-gray-50 transition">
                                 <User size={18} />
                                 <span className="font-medium">My Profile</span>

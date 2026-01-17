@@ -44,19 +44,38 @@ class IndexController extends Controller
             ->withExists(['favourites as is_favorite' => function ($q) {
                 $q->where('user_id', auth()->id());
             }])
+            ->withExists(['carts as in_cart' => function ($q) {
+                $q->where('user_id', auth()->id());
+            }])
             ->latest()
             ->get();
 
         // Optimized Filter Options
         $filterOptions = [
-            'makes' => DB::table('fitments')->distinct()->orderBy('make')->pluck('make'),
+            'makes' => DB::table('fitments')
+                ->distinct()
+                ->orderBy('make')
+                ->pluck('make')
+                ->toArray(), // Force array
+
             'models' => DB::table('fitments')
                 ->when($request->make, fn ($q, $make) => $q->where('make', $make))
                 ->distinct()
                 ->orderBy('model')
-                ->pluck('model'),
-            'years' => DB::table('fitments')->distinct()->orderByDesc('year_from')->pluck('year_from'),
-            'locations' => Product::whereNotNull('location_id')->distinct()->orderBy('location_id')->pluck('location_id'),
+                ->pluck('model')
+                ->toArray(),
+
+            'years' => DB::table('fitments')
+                ->distinct()
+                ->orderByDesc('year_from')
+                ->pluck('year_from')
+                ->toArray(),
+
+            'locations' => Product::whereNotNull('location_id')
+                ->distinct()
+                ->orderBy('location_id')
+                ->pluck('location_id')
+                ->toArray(),
         ];
 
         return Inertia::render('User/Parts/Index', [
@@ -87,5 +106,32 @@ class IndexController extends Controller
         }
 
         return back()->with('success', 'Product added to cart!');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+        $cartItem = Cart::where('user_id', auth()->id())
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $cartItem->update([
+            'quantity' => $request->quantity,
+        ]);
+
+        return back()->with('success', 'Cart updated successfully');
+    }
+
+    public function destroy($id)
+    {
+        $cartItem = Cart::where('user_id', auth()->id())
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $cartItem->delete();
+
+        return back()->with('success', 'Product removed from cart');
     }
 }

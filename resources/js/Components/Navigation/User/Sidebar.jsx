@@ -20,7 +20,7 @@ const MENU = [
         title: "MAIN",
         items: [
             { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-            { label: "Parts", icon: Settings, path: "/parts" },
+            { label: "Shop Parts", icon: Settings, path: "/parts" },
         ],
     },
     {

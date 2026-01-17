@@ -47,4 +47,9 @@ class Product extends Model
     {
         return $this->hasMany(Favourite::class);
     }
+
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
+    }
 }
