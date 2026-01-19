@@ -44,7 +44,7 @@ class ProductSeeder extends Seeder
                 'stock_oakville' => rand(0, 100),
                 'stock_mississauga' => rand(0, 100),
                 'stock_saskatoon' => rand(0, 100),
-                'sku' => 'SKU-'.strtoupper(Str::random(8)),
+                'sku' => strtoupper(Str::random(8)),
                 'location_id' => 'LOC-'.rand(100, 999),
                 'visibility' => 'public',
                 'created_at' => now(),

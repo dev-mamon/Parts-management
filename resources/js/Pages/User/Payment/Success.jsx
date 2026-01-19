@@ -65,7 +65,7 @@ export default function Success({ auth, order }) {
 
                         <div className="text-center mt-6">
                             <Link
-                                href="/"
+                                href="/dashboard"
                                 className="text-slate-400 font-bold text-[10px] uppercase tracking-widest hover:text-slate-900 flex items-center justify-center gap-1 transition-colors"
                             >
                                 <Home size={12} /> Go to Dashboard <ArrowRight size={10} />

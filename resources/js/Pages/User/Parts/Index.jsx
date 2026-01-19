@@ -129,6 +129,7 @@ const ProductRow = memo(({ product, quantity, styles, onToggleFavorite, onQuanti
                 </p>
             </td>
             <td className="px-2 py-2 text-sm font-semibold text-center">{product.location_id || "—"}</td>
+            <td className="px-2 py-2 text-sm font-semibold text-center">{product.sku || "—"}</td>
             <td className="px-2 py-2 text-center font-bold text-gray-400 text-xs">${product.buy_price || "0.00"}</td>
             <td className="px-2 py-2 text-center font-bold text-slate-900">${product.list_price || "0.00"}</td>
             <td className="px-6 py-2">
@@ -270,6 +271,7 @@ export default function Index() {
                                     <th className="px-6 py-4 font-bold w-[200px]">Image</th>
                                     <th className="px-6 py-4 font-bold">Description & Fitment</th>
                                     <th className="px-6 py-4 font-bold text-center w-[120px]">Location</th>
+                                    <th className="px-6 py-4 font-bold text-center w-[120px]">SKU</th>
                                     <th className="px-6 py-4 font-bold text-center w-[100px]">List Price</th>
                                     <th className="px-6 py-4 font-bold text-center w-[100px]">Your Price</th>
                                     <th className="px-6 py-4 w-[150px]"></th>
@@ -283,6 +285,7 @@ export default function Index() {
                                             <td className="py-2 px-6"><div className="flex items-center gap-4"><Skeleton className="w-4 h-12 rounded" /><Skeleton className="w-10 h-10 rounded-lg" /></div></td>
                                             <td className="px-6 py-2"><Skeleton className="h-4 w-3/4 rounded mb-2" /><Skeleton className="h-3 w-1/2 rounded" /></td>
                                             <td className="px-6 py-2"><Skeleton className="h-4 w-10 mx-auto rounded" /></td>
+                                            <td className="px-6 py-2"><Skeleton className="h-4 w-12 mx-auto rounded" /></td>
                                             <td className="px-6 py-2"><Skeleton className="h-4 w-12 mx-auto rounded" /></td>
                                             <td className="px-6 py-2"><Skeleton className="h-4 w-12 mx-auto rounded" /></td>
                                             <td className="px-6 py-2"><Skeleton className="w-24 h-9 rounded ml-auto" /></td>
