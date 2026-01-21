@@ -17,14 +17,14 @@ export default function ConfirmDelete({
             text,
             icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: "#FF9F43",
-            cancelButtonColor: "#d33",
+            confirmButtonColor: "#EF4444", 
+            cancelButtonColor: "#94A3B8",
             confirmButtonText,
             cancelButtonText,
             customClass: {
-                popup: "rounded-sm",
-                confirmButton: "rounded-sm px-4 py-2 font-bold",
-                cancelButton: "rounded-sm px-4 py-2 font-bold",
+                popup: "rounded-2xl border-none shadow-xl",
+                confirmButton: "rounded-lg px-5 py-2 font-semibold text-sm",
+                cancelButton: "rounded-lg px-5 py-2 font-semibold text-sm",
             },
         }).then((result) => {
             if (result.isConfirmed) {
@@ -39,7 +39,7 @@ export default function ConfirmDelete({
         <button
             type="button"
             onClick={handleClick}
-            className="p-1.5 text-gray-400 hover:text-red-500 bg-white border rounded shadow-sm transition"
+            className="inline-flex items-center justify-center w-8 h-8 text-slate-400 hover:text-rose-600 hover:bg-white bg-transparent border border-transparent hover:border-slate-200 rounded-lg transition-all duration-200"
         >
             <Trash2 size={15} />
         </button>

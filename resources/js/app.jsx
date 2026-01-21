@@ -23,6 +23,15 @@ function FlashMessages({ children }) {
             toast.error(flash.error, { position: "top-center" });
         }
 
+        // server side (Flash Warning)
+        if (flash?.warning) {
+            toast(flash.warning, {
+                icon: "⚠️",
+                position: "top-center",
+                duration: 4000,
+            });
+        }
+
         // -- Validation Errors --
         const errorKeys = Object.keys(errors);
         if (errorKeys.length > 0) {

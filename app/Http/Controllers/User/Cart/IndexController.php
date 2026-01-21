@@ -18,10 +18,18 @@ class IndexController extends Controller
         }
 
         $cartItems = Cart::where('user_id', auth()->id())
-            ->with('product.files')
+            ->with(['product' => function ($q) {
+                $q->with(['files', 'fitments', 'partsNumbers', 'category'])
+                    ->withExists(['quoteItems as is_quoted' => function ($q) {
+                        $q->whereHas('quote', function ($q) {
+                            $q->where('user_id', auth()->id())->where('status', 'active');
+                        });
+                    }]);
+            }])
             ->get()
             ->map(function ($item) {
                 $firstFile = $item->product->files->first();
+                $price = $item->product->buy_price ?? $item->product->list_price;
 
                 return [
                     'id' => $item->id,
@@ -30,9 +38,10 @@ class IndexController extends Controller
                     'name' => $item->product->name,
                     'description' => $item->product->description,
                     'list_price' => $item->product->list_price,
-                    'buy_price' => $item->product->buy_price ?? $item->product->list_price,
+                    'buy_price' => $price,
                     'quantity' => $item->quantity,
                     'image' => Helper::generateURL($firstFile?->file_path),
+                    'product' => $item->product, // Pass full object with is_quoted
                 ];
             });
 

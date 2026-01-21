@@ -3,8 +3,14 @@
 @tailwind components;
 @tailwind utilities;
 
-::-webkit-scrollbar {
-    display: none;
+/* Absolute Hide All Scrollbars but allow scrolling */
+html, body, * {
+    -ms-overflow-style: none !important;  /* IE and Edge */
+    scrollbar-width: none !important;  /* Firefox */
+}
+
+*::-webkit-scrollbar {
+    display: none !important; /* Chrome, Safari and Opera */
 }
 
 @layer base {
@@ -68,6 +74,17 @@
         @apply border-border;
     }
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground font-sans;
+        font-family: 'Figtree', sans-serif !important;
+    }
+}
+@layer utilities {
+    @keyframes progress-indeterminate {
+        0% { transform: translateX(-100%); width: 30%; }
+        50% { transform: translateX(100%); width: 60%; }
+        100% { transform: translateX(400%); width: 30%; }
+    }
+    .animate-progress-indeterminate {
+        animation: progress-indeterminate 1.5s infinite linear;
     }
 }

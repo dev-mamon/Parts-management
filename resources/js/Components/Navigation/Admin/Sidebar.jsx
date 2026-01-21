@@ -15,6 +15,7 @@ import {
     UserCircle,
     Mail,
     CreditCard,
+    Headset,
     X,
 } from "lucide-react";
 
@@ -46,14 +47,31 @@ const Sidebar = ({ isCollapsed, isMobileOpen, setIsMobileOpen }) => {
             path: "/dashboard",
             icon: <LayoutDashboard size={18} />,
         },
-        { label: "Orders", path: "/orders", icon: <ShoppingCart size={18} /> },
+        { label: "Orders", path: "/admin/orders", icon: <ShoppingCart size={18} /> },
         {
             label: "Categories",
             path: "/categories",
             icon: <List size={18} />,
         },
-        { label: "Returns", path: "/returns", icon: <RefreshCw size={18} /> },
-        { label: "All leads", path: "/leads", icon: <Users size={18} /> },
+        { label: "Returns", path: "/admin/returns", icon: <RefreshCw size={18} /> },
+        {
+            label: "Leads",
+            path: "/admin/leads",
+            icon: <Users size={18} />,
+            key: "leads",
+            children: [
+                {
+                    label: "All Leads",
+                    path: "/admin/leads",
+                    icon: <List size={14} />,
+                },
+                {
+                    label: "Add Lead",
+                    path: "/admin/leads/create",
+                    icon: <PlusCircle size={14} />,
+                },
+            ],
+        },
         {
             label: "Sales - B2C",
             path: "/sales-b2c",
@@ -100,15 +118,20 @@ const Sidebar = ({ isCollapsed, isMobileOpen, setIsMobileOpen }) => {
                 },
             ],
         },
+        // {
+        //     label: "Create Invoice",
+        //     path: "/invoice/create",
+        //     icon: <FileText size={18} />,
+        // },
+        // {
+        //     label: "Analytics",
+        //     path: "/analytics",
+        //     icon: <BarChart2 size={18} />,
+        // },
         {
-            label: "Create Invoice",
-            path: "/invoice/create",
-            icon: <FileText size={18} />,
-        },
-        {
-            label: "Analytics",
-            path: "/analytics",
-            icon: <BarChart2 size={18} />,
+            label: "Support Tickets",
+            path: "/admin/support",
+            icon: <Headset size={18} />,
         },
         {
             label: "Settings",
@@ -175,9 +198,10 @@ const Sidebar = ({ isCollapsed, isMobileOpen, setIsMobileOpen }) => {
 
                 <div className="space-y-1">
                     {menuItems.map((item) => {
+                        const currentPath = url.split('?')[0];
                         const isActive = item.children
-                            ? item.children.some((child) => url === child.path)
-                            : url === item.path;
+                            ? item.children.some((child) => currentPath === child.path)
+                            : currentPath === item.path;
 
                         return item.children ? (
                             <SidebarItem
@@ -197,15 +221,15 @@ const Sidebar = ({ isCollapsed, isMobileOpen, setIsMobileOpen }) => {
                                                 key={child.path}
                                                 href={child.path}
                                                 className={`flex items-center gap-3 ml-4 py-2 px-3 rounded-md text-sm transition-all ${
-                                                    url === child.path
-                                                        ? "text-orange-600 font-semibold bg-orange-50/50"
-                                                        : "text-slate-500 hover:text-orange-500 hover:bg-gray-50"
+                                                    currentPath === child.path
+                                                        ? "text-[#FF9F43] font-semibold bg-[#FF9F43]/10"
+                                                        : "text-slate-500 hover:text-[#FF9F43] hover:bg-gray-50"
                                                 }`}
                                             >
                                                 <span
                                                     className={`${
                                                         url === child.path
-                                                            ? "text-orange-600"
+                                                            ? "text-[#FF9F43]"
                                                             : "text-slate-400"
                                                     }`}
                                                 >
@@ -252,13 +276,13 @@ const SidebarItem = ({
                 isCollapsed ? "justify-center px-0" : "px-3"
             } ${
                 active && !hasChild
-                    ? "bg-orange-50 text-orange-600"
-                    : "text-slate-600 hover:bg-gray-50 hover:text-orange-600"
-            } ${hasChild && active ? "text-orange-600 font-semibold" : ""}`}
+                    ? "bg-[#FF9F43]/10 text-[#FF9F43]"
+                    : "text-slate-600 hover:bg-gray-50 hover:text-[#FF9F43]"
+            } ${hasChild && active ? "text-[#FF9F43] font-semibold" : ""}`}
         >
             <div
                 className={`shrink-0 transition-colors ${
-                    active ? "text-orange-600" : "group-hover:text-orange-600"
+                    active ? "text-[#FF9F43]" : "group-hover:text-[#FF9F43]"
                 }`}
             >
                 {icon}
@@ -273,7 +297,7 @@ const SidebarItem = ({
                         size={14}
                         className={`transition-transform duration-200 ${
                             isOpen
-                                ? "rotate-90 text-orange-600"
+                                ? "rotate-90 text-[#FF9F43]"
                                 : "text-gray-400"
                         }`}
                     />

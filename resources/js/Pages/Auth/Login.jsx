@@ -18,7 +18,7 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
 
     // Inertia form state & helpers
-    const { data, setData, post, processing, errors, reset, clearErrors } =
+    const { data, setData, post, processing, errors, reset, clearErrors, setError } =
         useForm({
             email: "",
             password: "",
@@ -38,6 +38,25 @@ export default function Login() {
     // Form submit handler
     const submit = (e) => {
         e.preventDefault();
+        
+        // Frontend Validation
+        let hasError = false;
+        clearErrors();
+
+        if (!data.email.trim()) {
+            setError("email", "Username or email is required.");
+            hasError = true;
+        }
+
+        if (!data.password) {
+            setError("password", "Password is required.");
+            hasError = true;
+        } else if (data.password.length < 6) { // Lowered to 6 to be more standard/permissive for now unless otherwise specified
+            setError("password", "Password must be at least 6 characters.");
+            hasError = true;
+        }
+
+        if (hasError) return;
 
         // Send login request
         post(route("login"), {

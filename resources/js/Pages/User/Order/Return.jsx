@@ -1,25 +1,85 @@
 import React, { useState, useEffect } from "react";
 import UserLayout from "@/Layouts/UserLayout";
-import { Head, usePage } from "@inertiajs/react";
+import { Head, usePage, Link } from "@inertiajs/react";
 import { Skeleton } from "@/Components/ui/Skeleton";
 import RequestModal from "./RequestModal";
-import { FileText, Package, Box, CheckCircle, Clock } from "lucide-react";
+import { 
+    FileText, Package, Box, CheckCircle, Clock, 
+    RotateCcw, Calendar, Hash, XCircle, 
+    MessageSquare, AlertTriangle 
+} from "lucide-react";
+
+// --- Advanced Skeleton Component ---
+const ReturnCardSkeleton = () => (
+    <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-6 md:p-8 mb-10">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8 pb-8 border-b border-slate-50">
+            <div className="flex items-center gap-4">
+                <Skeleton className="w-14 h-14 rounded-2xl" />
+                <div className="space-y-2">
+                    <Skeleton className="h-3 w-16" />
+                    <Skeleton className="h-6 w-32" />
+                    <div className="flex gap-4">
+                        <Skeleton className="h-3 w-20" />
+                        <Skeleton className="h-3 w-20" />
+                    </div>
+                </div>
+            </div>
+            <div className="flex flex-col items-end gap-3 w-full md:w-auto">
+                <Skeleton className="h-8 w-24 rounded-full" />
+                <div className="space-y-1 text-right">
+                    <Skeleton className="h-2 w-16 ml-auto" />
+                    <Skeleton className="h-6 w-24 ml-auto" />
+                </div>
+            </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+                <Skeleton className="h-3 w-32" />
+                <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100 space-y-3">
+                    <Skeleton className="h-12 w-full rounded-xl" />
+                    <Skeleton className="h-12 w-full rounded-xl" />
+                </div>
+            </div>
+            <div className="space-y-4">
+                <Skeleton className="h-3 w-32" />
+                <div className="space-y-5">
+                    <div className="flex gap-4">
+                        <Skeleton className="w-10 h-10 rounded-xl" />
+                        <div className="space-y-1">
+                            <Skeleton className="h-2 w-12" />
+                            <Skeleton className="h-4 w-24" />
+                        </div>
+                    </div>
+                    <Skeleton className="h-16 w-full rounded-2xl" />
+                </div>
+            </div>
+        </div>
+    </div>
+);
 
 export default function OrderReturn() {
     const { auth, returns, orders } = usePage().props;
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const returnList = Array.isArray(returns) ? returns : [];
+
     useEffect(() => {
-        const timer = setTimeout(() => setIsLoading(false), 800);
-        return () => clearTimeout(timer);
-    }, []);
+        // যদি ডাটা একদম খালি থাকে, তবে স্কেলিটন না দেখিয়ে সরাসরি এম্পটি স্টেট দেখাবো
+        if (returnList.length === 0) {
+            setIsLoading(false);
+        } else {
+            const timer = setTimeout(() => setIsLoading(false), 1200);
+            return () => clearTimeout(timer);
+        }
+    }, [returnList.length]);
 
     const getStatusStyles = (status) => {
         const styles = {
-            approved: "bg-[#F0FDF4] text-[#16A34A] border-[#DCFCE7]",
-            pending: "bg-orange-50 text-orange-600 border-orange-100",
-            rejected: "bg-red-50 text-red-600 border-red-100",
+            completed: "bg-emerald-50 text-emerald-600 border-emerald-100",
+            approved: "bg-amber-50 text-amber-600 border-amber-100",
+            pending: "bg-blue-50 text-blue-600 border-blue-100",
+            rejected: "bg-rose-50 text-rose-600 border-rose-100",
         };
         return styles[status] || "bg-gray-50 text-gray-600 border-gray-100";
     };
@@ -27,165 +87,152 @@ export default function OrderReturn() {
     return (
         <>
             <UserLayout user={auth.user} isBlur={isModalOpen}>
-                <Head title="Return Requests" />
-                <div className="p-6 bg-[#F8F9FB] min-h-screen">
+                <Head title="My Return Requests" />
+                <div className="p-4 md:p-8 bg-[#F8F9FB] min-h-screen">
                     <div className="max-w-8xl mx-auto">
-                        <div className="flex justify-between items-center mb-8">
-                            <div className="flex gap-3">
-                                <button className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-bold flex items-center gap-2">
-                                    <FileText className="w-4 h-4 text-red-600" />
-                                    Return Policy
+                        
+                        {/* Header Section */}
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                            <div>
+                                <h1 className="text-2xl font-black text-slate-900 tracking-tight">Return Requests</h1>
+                                <p className="text-slate-500 text-sm mt-1 font-medium">Manage your order returns and track their status.</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <Link
+                                    href={route('orders.history')}
+                                    className="px-5 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-sm"
+                                >
+                                    <Package className="w-4 h-4" />
+                                    Order History
+                                </Link>
+                                <button
+                                    onClick={() => setIsModalOpen(true)}
+                                    className="bg-[#FF9F43] hover:bg-[#e68a30] text-white px-6 py-2.5 rounded-full font-black text-sm flex items-center gap-2 transition-all shadow-sm active:scale-95"
+                                >
+                                    <RotateCcw className="w-4 h-4" /> New Return
                                 </button>
                             </div>
-                            <button
-                                onClick={() => setIsModalOpen(true)}
-                                className="bg-red-700 hover:bg-red-800 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2 transition-colors"
-                            >
-                                <span className="text-xl">+</span> New Return
-                                Request
-                            </button>
                         </div>
 
+                        {/* Content Logic */}
                         {isLoading ? (
-                            <div className="space-y-6">
-                                <Skeleton className="h-40 w-full" />
+                            <div className="space-y-10">
+                                {returnList.slice(0, 2).map((_, i) => (
+                                    <ReturnCardSkeleton key={i} />
+                                ))}
                             </div>
-                        ) : returns.length === 0 ? (
-                            <div className="text-center py-20 bg-white rounded-2xl border border-dashed">
-                                <Box className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                                <p className="text-gray-500 font-medium">
-                                    No return requests found.
+                        ) : returnList.length === 0 ? (
+                            <div className="bg-white p-20 rounded-[2.5rem] border border-slate-100 text-center shadow-sm">
+                                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <Box className="w-8 h-8 text-slate-200" />
+                                </div>
+                                <h2 className="text-xl font-black text-slate-900">
+                                    No return requests yet
+                                </h2>
+                                <p className="text-slate-500 text-sm mt-2 max-w-xs mx-auto">
+                                    When you submit a return request for a delivered order, it will appear here.
                                 </p>
+                                <button 
+                                    onClick={() => setIsModalOpen(true)}
+                                    className="mt-8 px-8 py-3 bg-[#FF9F43] text-white rounded-full font-bold text-sm hover:shadow-lg hover:shadow-orange-200 transition-all active:scale-95 inline-block"
+                                >
+                                    Start a new return request
+                                </button>
                             </div>
                         ) : (
-                            <div className="space-y-6">
-                                {returns.map((ret) => (
+                            <div className="space-y-10">
+                                {returnList.map((ret) => (
                                     <div
                                         key={ret.id}
-                                        className="bg-white rounded-xl border border-gray-100 shadow-sm p-6"
+                                        className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden hover:shadow-md transition-shadow duration-300"
                                     >
-                                        <div className="flex justify-between items-start mb-6">
-                                            <div className="flex items-center gap-3">
-                                                <div className="p-2 bg-red-50 rounded-lg">
-                                                    <FileText className="w-5 h-5 text-red-600" />
-                                                </div>
-                                                <div>
-                                                    <h3 className="font-bold text-slate-900">
-                                                        Return RET-{ret.id}
-                                                    </h3>
-                                                    <p className="text-xs text-slate-500">
-                                                        Original Order:{" "}
-                                                        {ret.order.order_number}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-6">
-                                                <div
-                                                    className={`px-4 py-1 rounded-full border text-[11px] font-black uppercase flex items-center gap-2 ${getStatusStyles(ret.status)}`}
-                                                >
-                                                    {ret.status ===
-                                                        "approved" && (
-                                                        <CheckCircle className="w-3.5 h-3.5" />
-                                                    )}
-                                                    {ret.status ===
-                                                        "pending" && (
-                                                        <Clock className="w-3.5 h-3.5" />
-                                                    )}
-                                                    {ret.status}
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="text-[10px] font-bold text-slate-400 uppercase">
-                                                        Refund Amount
-                                                    </p>
-                                                    <p className="text-lg font-black text-slate-900">
-                                                        $
-                                                        {ret.order.total_amount}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4 bg-gray-50/50 rounded-xl p-4 mb-6 border border-gray-100">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 bg-white rounded flex items-center justify-center border border-gray-100">
-                                                    <Clock className="w-4 h-4 text-blue-500" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-[10px] font-bold text-gray-400 uppercase">
-                                                        Request Date
-                                                    </p>
-                                                    <p className="text-sm font-bold text-slate-700">
-                                                        {new Date(
-                                                            ret.created_at,
-                                                        ).toLocaleDateString()}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 bg-white rounded flex items-center justify-center border border-gray-100">
-                                                    <Package className="w-4 h-4 text-purple-500" />
-                                                </div>
-                                                <div>
-                                                    <p className="text-[10px] font-bold text-gray-400 uppercase">
-                                                        Items
-                                                    </p>
-                                                    <p className="text-sm font-bold text-slate-700">
-                                                        {ret.order.items.length}{" "}
-                                                        parts
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            {ret.order.items.map((item) => (
-                                                <div
-                                                    key={item.id}
-                                                    className="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-xl"
-                                                >
-                                                    <div className="flex items-center gap-4">
-                                                        <img
-                                                            src={`/${item.product.files[0]?.file_path}`}
-                                                            className="w-12 h-12 object-cover rounded-lg border"
-                                                        />
-                                                        <div>
-                                                            <p className="text-sm font-black text-slate-900">
-                                                                {
-                                                                    item.product
-                                                                        .sku
-                                                                }
-                                                            </p>
-                                                            <p className="text-[11px] text-gray-500 uppercase">
-                                                                {
-                                                                    item.product
-                                                                        .name
-                                                                }
-                                                            </p>
-                                                            <p className="text-[10px] font-bold text-gray-400">
-                                                                QTY:{" "}
-                                                                {item.quantity}
-                                                            </p>
+                                        <div className="p-6 md:p-8">
+                                            {/* Request Header */}
+                                            <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8 pb-8 border-b border-slate-50">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center shrink-0 border border-orange-100">
+                                                        <RotateCcw className="w-7 h-7 text-[#FF9F43]" />
+                                                    </div>
+                                                    <div>
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Request ID</span>
+                                                            <h3 className="font-black text-slate-900 text-lg">RET-{ret.id.toString().padStart(5, '0')}</h3>
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-xs font-bold text-slate-500">
+                                                            <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 opacity-60" /> {new Date(ret.created_at).toLocaleDateString()}</span>
+                                                            <span className="flex items-center gap-1.5"><Hash className="w-3.5 h-3.5 opacity-60" /> Order #{ret.order.order_number}</span>
                                                         </div>
                                                     </div>
+                                                </div>
+                                                
+                                                <div className="flex flex-col items-end gap-3 w-full md:w-auto">
+                                                    <div className={`px-4 py-1.5 rounded-full border text-[11px] font-black uppercase tracking-wider flex items-center gap-2 ${getStatusStyles(ret.status)}`}>
+                                                        {ret.status === "pending" && <Clock className="w-3.5 h-3.5" />}
+                                                        {ret.status === "approved" && <CheckCircle className="w-3.5 h-3.5" />}
+                                                        {ret.status === "rejected" && <XCircle className="w-3.5 h-3.5" />}
+                                                        {ret.status}
+                                                    </div>
                                                     <div className="text-right">
-                                                        <p className="text-[10px] font-bold text-gray-400 uppercase">
-                                                            Total
-                                                        </p>
-                                                        <p className="text-sm font-black text-slate-900">
-                                                            ${item.price}
-                                                        </p>
+                                                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Order Value</p>
+                                                        <p className="text-xl font-black text-slate-900">${parseFloat(ret.order.total_amount).toFixed(2)}</p>
                                                     </div>
                                                 </div>
-                                            ))}
-                                        </div>
+                                            </div>
 
-                                        <div className="mt-6 p-4 bg-gray-50/50 rounded-xl border border-gray-100">
-                                            <p className="text-sm font-bold text-slate-900 mb-1">
-                                                Reason:
-                                            </p>
-                                            <p className="text-sm text-slate-600">
-                                                {ret.reason}
-                                            </p>
+                                            {/* Details Grid */}
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                {/* Left Column: Items */}
+                                                <div className="space-y-4">
+                                                    <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Items in this return</h4>
+                                                    <div className="space-y-3 bg-slate-50/50 p-4 rounded-3xl border border-slate-100">
+                                                        {ret.order.items.map((item) => (
+                                                            <div key={item.id} className="flex items-center justify-between bg-white p-3 rounded-2xl border border-slate-100/50 shadow-sm">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center overflow-hidden border border-slate-100 shrink-0">
+                                                                        {item.product.files?.[0] ? (
+                                                                            <img src={`/${item.product.files[0].thumbnail_path}`} className="w-full h-full object-cover" />
+                                                                        ) : <Package className="w-5 h-5 text-slate-200" />}
+                                                                    </div>
+                                                                    <div className="min-w-0">
+                                                                        <p className="text-xs font-black text-slate-800 truncate">{item.product.sku}</p>
+                                                                        <p className="text-[10px] text-slate-400 font-bold uppercase truncate">{item.product.name}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <span className="text-xs font-black text-slate-900 shrink-0 px-2">×{item.quantity}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                {/* Right Column: Reason & Description */}
+                                                <div className="space-y-4">
+                                                    <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Return Information</h4>
+                                                    <div className="space-y-5">
+                                                        <div className="flex gap-4">
+                                                            <div className="w-10 h-10 bg-white shadow-sm border border-slate-100 rounded-xl flex items-center justify-center shrink-0 text-slate-400">
+                                                                <MessageSquare className="w-5 h-5" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Reason</p>
+                                                                <p className="text-sm font-bold text-slate-700">{ret.reason}</p>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div className="p-5 bg-orange-50/30 rounded-3xl border border-orange-100/50 italic">
+                                                            <p className="text-[13px] text-slate-600 leading-relaxed font-medium">"{ret.description}"</p>
+                                                        </div>
+
+                                                        {ret.rejection_reason && (
+                                                            <div className="p-4 bg-rose-50 rounded-2xl border border-rose-100">
+                                                                <div className="flex items-center gap-2 text-rose-600 text-[11px] font-black uppercase tracking-widest mb-1">
+                                                                    <AlertTriangle size={14} /> Admin Feedback
+                                                                </div>
+                                                                <p className="text-[13px] text-rose-700 font-medium">"{ret.rejection_reason}"</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -194,6 +241,8 @@ export default function OrderReturn() {
                     </div>
                 </div>
             </UserLayout>
+
+            {/* Modal */}
             <RequestModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

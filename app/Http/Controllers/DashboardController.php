@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
+use App\Models\Quote;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -15,7 +17,12 @@ class DashboardController extends Controller
         }
 
         // Default user dashboard
-        return Inertia::render('User/Dashboard');
+        return Inertia::render('User/Dashboard', [
+            'stats' => [
+                'activeOrdersCount' => Order::where('user_id', $user->id)->whereIn('status', ['pending', 'processing', 'shipped'])->count(),
+                'savedQuotesCount' => Quote::where('user_id', $user->id)->count(),
+            ]
+        ]);
     }
 
     public function parts()

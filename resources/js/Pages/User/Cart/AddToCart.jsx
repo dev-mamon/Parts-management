@@ -1,11 +1,34 @@
 import UserLayout from "@/Layouts/UserLayout";
 import { Head, usePage, router, Link } from "@inertiajs/react";
-import { Plus, Minus, ShoppingBag, ImageOff, ChevronLeft } from "lucide-react";
+import { Plus, Minus, ShoppingBag, ImageOff, ChevronLeft, Eye, Bookmark, Star } from "lucide-react";
 import ConfirmDelete from "@/Components/ui/ConfirmDelete";
 import ConfirmCheckout from "@/Components/ui/ConfirmCheckout";
+import ProductDetailsModal from "@/Components/ui/user/ProductDetailsModal";
+import { useState, useCallback } from "react";
+import { toast } from "react-hot-toast";
 
 export default function AddToCart() {
     const { auth, cartItems, subtotal, total } = usePage().props;
+
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const handleOpenModal = useCallback((itemProduct) => {
+        setSelectedProduct(itemProduct);
+        setIsModalOpen(true);
+    }, []);
+
+    const handleCloseModal = useCallback(() => {
+        setIsModalOpen(false);
+    }, []);
+
+    const handleToggleFavorite = (productId) => {
+        router.post(
+            route("parts.favourite"),
+            { product_id: productId },
+            { preserveScroll: true }
+        );
+    };
 
     const handleUpdateQuantity = (id, currentQty, delta) => {
         const newQuantity = currentQty + delta;
@@ -19,6 +42,12 @@ export default function AddToCart() {
                 },
             );
         }
+    };
+
+    const handleSaveQuote = () => {
+        router.post(route("quotes.store-from-cart"), {}, {
+            onSuccess: () => toast.success("Cart saved as a quote!"),
+        });
     };
 
     return (
@@ -84,10 +113,18 @@ export default function AddToCart() {
                                                         </p>
                                                     </div>
 
-                                                    <ConfirmDelete
-                                                        id={item.id}
-                                                        routeName="carts.destroy"
-                                                    />
+                                                    <div className="flex flex-col gap-2 items-end">
+                                                        <ConfirmDelete
+                                                            id={item.id}
+                                                            routeName="carts.destroy"
+                                                        />
+                                                        <button 
+                                                            onClick={() => handleOpenModal(item.product)}
+                                                            className="flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-red-600 transition-colors uppercase tracking-widest"
+                                                        >
+                                                            <Eye size={12} /> View Details
+                                                        </button>
+                                                    </div>
                                                 </div>
 
                                                 <div className="flex justify-between items-center mt-4">
@@ -227,7 +264,10 @@ export default function AddToCart() {
 
                                 {/* Action Buttons Stack */}
                                 <div className="flex flex-col gap-3">
-                                    <button className="group w-full flex items-center justify-between gap-3 px-5 py-3 border-2 border-red-500 text-red-600 rounded-full font-bold hover:bg-red-50 transition-all active:scale-[0.98]">
+                                    <button 
+                                        onClick={handleSaveQuote}
+                                        className="group w-full flex items-center justify-between gap-3 px-5 py-3 border-2 border-red-500 text-red-600 rounded-full font-bold hover:bg-red-50 transition-all active:scale-[0.98]"
+                                    >
                                         <span className="flex-1 text-center whitespace-nowrap">
                                             Save Quote
                                         </span>
@@ -269,6 +309,12 @@ export default function AddToCart() {
                     </div>
                 </div>
             </div>
+            <ProductDetailsModal 
+                product={selectedProduct}
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                onToggleFavorite={handleToggleFavorite}
+            />
         </UserLayout>
     );
 }

@@ -71,38 +71,40 @@ export default function Create({ categories, subCategories }) {
     return (
         <AdminLayout>
             <Head title="Create Product" />
-            <div className="p-6 bg-[#F8F9FB] min-h-screen font-sans">
+            <div className="p-6 bg-slate-50/50 min-h-screen font-sans">
                 {/* Header */}
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                            <Plus className="text-orange-500" /> Create New
-                            Product
+                        <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                            <Plus className="text-[#FF9F43]" size={24} /> 
+                            <span>Create New Product</span>
                         </h1>
+                        <p className="text-slate-500 text-[13px] mt-1">Add a new item to your inventory catalog.</p>
                     </div>
                     <Link
                         href={route("products.index")}
-                        className="flex items-center gap-2 bg-white border px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-gray-50 transition-all"
+                        className="inline-flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-xl text-[13px] font-semibold text-slate-600 shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all"
                     >
-                        <ChevronLeft size={18} /> Back to List
+                        <ChevronLeft size={16} /> Back to Inventory
                     </Link>
                 </div>
 
                 <form
                     onSubmit={handleSubmit}
-                    className="grid grid-cols-1 lg:grid-cols-12 gap-6"
+                    className="grid grid-cols-1 lg:grid-cols-12 gap-8"
                 >
                     {/* LEFT COLUMN */}
-                    <div className="lg:col-span-8 space-y-6">
+                    <div className="lg:col-span-8 space-y-8">
                         {/* Description Section */}
-                        <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-                            <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                                <Info size={18} className="text-orange-500" />
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
+                            <h3 className="text-[14px] font-bold text-slate-800 mb-5 flex items-center gap-2">
+                                <Info size={18} className="text-[#FF9F43]" />
                                 Product Description
                             </h3>
                             <Input
                                 isTextArea
-                                placeholder="Example: High-performance ceramic brake pads designed for reduced noise and dusting. Suitable for daily commuting..."
+                                placeholder="Write a detailed description of the product..."
+                                className="min-h-[140px] text-[13px] focus:ring-[#FF9F43]/10"
                                 value={data.description}
                                 error={errors.description}
                                 onChange={(e) =>
@@ -115,12 +117,12 @@ export default function Create({ categories, subCategories }) {
                         </div>
 
                         {/* Fitments Section */}
-                        <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-                            <div className="flex justify-between items-center mb-4 border-b pb-3">
-                                <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
+                            <div className="flex justify-between items-center mb-6 border-b border-slate-50 pb-4">
+                                <h3 className="text-[14px] font-bold text-slate-800 flex items-center gap-2">
                                     <Settings
                                         size={18}
-                                        className="text-orange-500"
+                                        className="text-[#FF9F43]"
                                     />
                                     Vehicle Fitment
                                 </h3>
@@ -137,9 +139,9 @@ export default function Create({ categories, subCategories }) {
                                             },
                                         ])
                                     }
-                                    className="text-xs font-bold text-orange-600 bg-orange-50 px-3 py-1.5 rounded-lg hover:bg-orange-100 flex items-center gap-1"
+                                    className="text-[12px] font-bold text-slate-600 bg-slate-50 border border-slate-100 px-4 py-2 rounded-xl hover:bg-slate-100 transition-colors flex items-center gap-1.5"
                                 >
-                                    <Plus size={14} /> Add Row
+                                    <Plus size={14} /> Add New Row
                                 </button>
                             </div>
 
@@ -147,74 +149,40 @@ export default function Create({ categories, subCategories }) {
                                 {data.fitments.map((fit, idx) => (
                                     <div
                                         key={idx}
-                                        className="grid grid-cols-4 gap-3 items-start bg-slate-50/50 p-3 rounded-xl border border-dashed border-slate-200"
+                                        className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end bg-slate-50/40 p-5 rounded-2xl border border-slate-100 relative group"
                                     >
                                         <Input
                                             label="Year From"
                                             placeholder="2018"
+                                            className="bg-white text-[13px]"
                                             value={fit.year_from}
-                                            error={
-                                                errors[
-                                                    `fitments.${idx}.year_from`
-                                                ]
-                                            }
-                                            onChange={(e) =>
-                                                updateFitment(
-                                                    idx,
-                                                    "year_from",
-                                                    e.target.value
-                                                )
-                                            }
+                                            error={errors[`fitments.${idx}.year_from`]}
+                                            onChange={(e) => updateFitment(idx, "year_from", e.target.value)}
                                         />
                                         <Input
                                             label="Year To"
                                             placeholder="2024"
+                                            className="bg-white text-[13px]"
                                             value={fit.year_to}
-                                            error={
-                                                errors[
-                                                    `fitments.${idx}.year_to`
-                                                ]
-                                            }
-                                            onChange={(e) =>
-                                                updateFitment(
-                                                    idx,
-                                                    "year_to",
-                                                    e.target.value
-                                                )
-                                            }
+                                            error={errors[`fitments.${idx}.year_to`]}
+                                            onChange={(e) => updateFitment(idx, "year_to", e.target.value)}
                                         />
                                         <Input
                                             label="Make"
                                             placeholder="e.g. Toyota"
+                                            className="bg-white text-[13px]"
                                             value={fit.make}
-                                            error={
-                                                errors[`fitments.${idx}.make`]
-                                            }
-                                            onChange={(e) =>
-                                                updateFitment(
-                                                    idx,
-                                                    "make",
-                                                    e.target.value
-                                                )
-                                            }
+                                            error={errors[`fitments.${idx}.make`]}
+                                            onChange={(e) => updateFitment(idx, "make", e.target.value)}
                                         />
-                                        <div className="flex gap-2 items-start">
+                                        <div className="flex gap-3 items-end">
                                             <Input
                                                 label="Model"
                                                 placeholder="e.g. RAV4"
+                                                className="grow bg-white text-[13px]"
                                                 value={fit.model}
-                                                error={
-                                                    errors[
-                                                        `fitments.${idx}.model`
-                                                    ]
-                                                }
-                                                onChange={(e) =>
-                                                    updateFitment(
-                                                        idx,
-                                                        "model",
-                                                        e.target.value
-                                                    )
-                                                }
+                                                error={errors[`fitments.${idx}.model`]}
+                                                onChange={(e) => updateFitment(idx, "model", e.target.value)}
                                             />
                                             {data.fitments.length > 1 && (
                                                 <button
@@ -228,9 +196,9 @@ export default function Create({ categories, subCategories }) {
                                                             )
                                                         )
                                                     }
-                                                    className="mt-8 text-slate-300 hover:text-red-500"
+                                                    className="inline-flex items-center justify-center w-9 h-9 text-slate-300 hover:text-rose-500 bg-white border border-slate-100 rounded-lg shadow-sm mb-[2px] transition-colors"
                                                 >
-                                                    <Trash2 size={18} />
+                                                    <Trash2 size={16} />
                                                 </button>
                                             )}
                                         </div>
@@ -240,30 +208,23 @@ export default function Create({ categories, subCategories }) {
                         </div>
 
                         {/* Part Numbers Section */}
-                        <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
-                            <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-3">
-                                <Tag size={18} className="text-orange-500" />
-                                Part Numbers
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
+                            <h3 className="text-[14px] font-bold text-slate-800 mb-6 flex items-center gap-2 border-b border-slate-50 pb-4">
+                                <Tag size={18} className="text-[#FF9F43]" />
+                                Alternate Part Numbers
                             </h3>
-                            <div className="flex flex-wrap gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                 {data.part_numbers.map((part, idx) => (
                                     <div
                                         key={idx}
-                                        className="relative min-w-[180px]"
+                                        className="relative group"
                                     >
                                         <Input
-                                            placeholder="e.g. OEM-99827-BC"
-                                            className="bg-white text-black"
+                                            placeholder="OEM-99827-BC"
+                                            className="bg-slate-50 border-slate-100 focus:bg-white text-[13px]"
                                             value={part}
-                                            error={
-                                                errors[`part_numbers.${idx}`]
-                                            }
-                                            onChange={(e) =>
-                                                updatePartNumber(
-                                                    idx,
-                                                    e.target.value
-                                                )
-                                            }
+                                            error={errors[`part_numbers.${idx}`]}
+                                            onChange={(e) => updatePartNumber(idx, e.target.value)}
                                         />
                                         {data.part_numbers.length > 1 && (
                                             <button
@@ -276,7 +237,7 @@ export default function Create({ categories, subCategories }) {
                                                         )
                                                     )
                                                 }
-                                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm hover:bg-red-600"
+                                                className="absolute -top-1.5 -right-1.5 bg-white text-slate-300 hover:text-rose-500 rounded-lg w-6 h-6 border border-slate-100 shadow-sm flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
                                             >
                                                 <Trash2 size={12} />
                                             </button>
@@ -285,26 +246,27 @@ export default function Create({ categories, subCategories }) {
                                 ))}
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        setData("part_numbers", [
-                                            ...data.part_numbers,
-                                            "",
-                                        ])
-                                    }
-                                    className="h-10 w-10 border-2 border-dashed border-slate-200 text-slate-400 rounded-lg flex items-center justify-center hover:border-orange-300 hover:text-orange-400"
+                                    onClick={() => setData("part_numbers", [...data.part_numbers, ""])}
+                                    className="h-[42px] border-2 border-dashed border-slate-200 text-slate-400 rounded-xl flex items-center justify-center hover:border-[#FF9F43]/50 hover:text-[#FF9F43] transition-all bg-slate-50/10"
                                 >
-                                    <Plus size={20} />
+                                    <Plus size={18} />
                                 </button>
                             </div>
                         </div>
                     </div>
 
                     {/* RIGHT COLUMN */}
-                    <div className="lg:col-span-4 space-y-6">
+                    <div className="lg:col-span-4 space-y-8">
                         {/* Category Grid */}
-                        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                            <h3 className="text-sm font-bold text-[#2D6BA4] mb-4 ">
-                                Category
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
+                            <h3 className="text-[14px] font-bold text-slate-800 mb-5 flex items-center justify-between">
+                                <span>Category</span>
+                                <Link
+                                    href={route("categories.create")}
+                                    className="text-[11px] font-bold text-slate-500 hover:text-[#FF9F43] bg-slate-50 border border-slate-100 px-2 py-1 rounded"
+                                >
+                                    Add New
+                                </Link>
                             </h3>
                             <div className="grid grid-cols-2 gap-2">
                                 {categories?.map((cat) => (
@@ -319,24 +281,18 @@ export default function Create({ categories, subCategories }) {
                                             }));
                                             clearErrors("category_id");
                                         }}
-                                        className={`py-2 px-1 text-[11px] font-bold rounded-md border transition-all ${
+                                        className={`py-2 px-2 text-[11px] font-bold rounded-xl border transition-all truncate ${
                                             data.category_id === cat.id
-                                                ? "bg-[#2D6BA4] text-white border-[#2D6BA4]"
-                                                : "bg-[#A9A9A9] text-white border-[#A9A9A9]"
+                                                ? "bg-[#FF9F43] text-white border-[#FF9F43]"
+                                                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
                                         }`}
                                     >
                                         {cat.name}
                                     </button>
                                 ))}
-                                <Link
-                                    href={route("categories.create")}
-                                    className="py-2 px-4 text-[11px] font-bold rounded-md bg-orange-600 text-white flex items-center justify-center gap-1 shadow-sm hover:bg-[#006837] transition-all"
-                                >
-                                    Add <Plus size={12} />
-                                </Link>
                             </div>
                             {errors.category_id && (
-                                <p className="text-red-500 text-[11px] mt-2 text-center">
+                                <p className="text-rose-500 text-[11px] mt-2 italic">
                                     {errors.category_id}
                                 </p>
                             )}
@@ -344,10 +300,8 @@ export default function Create({ categories, subCategories }) {
 
                         {/* Sub Category Grid */}
                         {data.category_id && (
-                            <div className="bg-white p-5 rounded-xl border border-amber-100 shadow-sm">
-                                <h3 className="text-sm font-bold text-amber-600 mb-4 text-center">
-                                    Sub Category
-                                </h3>
+                            <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+                                <h3 className="text-[14px] font-bold text-slate-800 mb-5">Sub Category</h3>
                                 <div className="grid grid-cols-2 gap-2">
                                     {filteredSubCategories?.map((sub) => (
                                         <button
@@ -360,135 +314,118 @@ export default function Create({ categories, subCategories }) {
                                                 );
                                                 clearErrors("sub_category_id");
                                             }}
-                                            className={`py-2 px-1 text-[11px] font-bold rounded-md border transition-all ${
+                                            className={`py-2 px-2 text-[11px] font-bold rounded-xl border transition-all truncate ${
                                                 data.sub_category_id === sub.id
-                                                    ? "bg-amber-500 text-white border-amber-500"
-                                                    : "bg-[#A9A9A9] text-white border-[#A9A9A9]"
+                                                    ? "bg-[#FF9F43] text-white border-[#FF9F43]"
+                                                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
                                             }`}
                                         >
                                             {sub.name}
                                         </button>
                                     ))}
                                 </div>
+                                {filteredSubCategories.length === 0 && (
+                                    <p className="text-slate-400 text-[11px] italic">No sub-categories available.</p>
+                                )}
                             </div>
                         )}
 
-                        {/* Pricing & Stock */}
-                        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                            <div className="grid grid-cols-2 gap-3">
-                                <Input
-                                    label="Buy Price ($)"
-                                    type="number"
-                                    placeholder="0.00"
-                                    value={data.buy_price}
-                                    error={errors.buy_price}
-                                    onChange={(e) =>
-                                        handleInputChange(
-                                            "buy_price",
-                                            e.target.value
-                                        )
-                                    }
-                                />
-                                <Input
-                                    label="List Price ($)"
-                                    type="number"
-                                    placeholder="0.00"
-                                    value={data.list_price}
-                                    error={errors.list_price}
-                                    onChange={(e) =>
-                                        handleInputChange(
-                                            "list_price",
-                                            e.target.value
-                                        )
-                                    }
-                                />
+                        {/* Inventory & Specs */}
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm space-y-6">
+                            <div className="space-y-4 pb-4 border-b border-slate-50">
+                                <h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Pricing (USD)</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input
+                                        label="Buy Price"
+                                        type="number"
+                                        placeholder="0.00"
+                                        className="text-[13px]"
+                                        value={data.buy_price}
+                                        error={errors.buy_price}
+                                        onChange={(e) => handleInputChange("buy_price", e.target.value)}
+                                    />
+                                    <Input
+                                        label="List Price"
+                                        type="number"
+                                        placeholder="0.00"
+                                        className="text-[13px]"
+                                        value={data.list_price}
+                                        error={errors.list_price}
+                                        onChange={(e) => handleInputChange("list_price", e.target.value)}
+                                    />
+                                </div>
                             </div>
-                            <div className="grid grid-cols-3 gap-2">
+
+                            <div className="space-y-4 pb-4 border-b border-slate-50">
+                                <h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Inventory Status</h4>
+                                <div className="grid grid-cols-3 gap-3">
+                                    <Input
+                                        label="Oakville"
+                                        type="number"
+                                        className="text-[13px]"
+                                        value={data.stock_oakville}
+                                        onChange={(e) => handleInputChange("stock_oakville", e.target.value)}
+                                    />
+                                    <Input
+                                        label="Mississauga"
+                                        type="number"
+                                        className="text-[13px]"
+                                        value={data.stock_mississauga}
+                                        onChange={(e) => handleInputChange("stock_mississauga", e.target.value)}
+                                    />
+                                    <Input
+                                        label="Saskatoon"
+                                        type="number"
+                                        className="text-[13px]"
+                                        value={data.stock_saskatoon}
+                                        onChange={(e) => handleInputChange("stock_saskatoon", e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 pt-1">
                                 <Input
-                                    label="Oakville"
-                                    type="number"
-                                    placeholder="0"
-                                    value={data.stock_oakville}
-                                    onChange={(e) =>
-                                        handleInputChange(
-                                            "stock_oakville",
-                                            e.target.value
-                                        )
-                                    }
+                                    label="SKU ID"
+                                    placeholder="SKU-..."
+                                    className="text-[13px]"
+                                    value={data.sku}
+                                    error={errors.sku}
+                                    onChange={(e) => handleInputChange("sku", e.target.value)}
                                 />
                                 <Input
-                                    label="Mississauga"
-                                    type="number"
-                                    placeholder="0"
-                                    value={data.stock_mississauga}
-                                    onChange={(e) =>
-                                        handleInputChange(
-                                            "stock_mississauga",
-                                            e.target.value
-                                        )
-                                    }
-                                />
-                                <Input
-                                    label="Saskatoon"
-                                    type="number"
-                                    placeholder="0"
-                                    value={data.stock_saskatoon}
-                                    onChange={(e) =>
-                                        handleInputChange(
-                                            "stock_saskatoon",
-                                            e.target.value
-                                        )
-                                    }
+                                    label="Location"
+                                    placeholder="BIN-..."
+                                    className="text-[13px]"
+                                    value={data.location_id}
+                                    error={errors.location_id}
+                                    onChange={(e) => handleInputChange("location_id", e.target.value)}
                                 />
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <Input
-                                label="SKU"
-                                placeholder="ABC-123-XYZ"
-                                value={data.sku}
-                                error={errors.sku}
-                                onChange={(e) =>
-                                    handleInputChange("sku", e.target.value)
-                                }
-                            />
-                            <Input
-                                label="Location ID"
-                                placeholder="BIN-01"
-                                value={data.location_id}
-                                error={errors.location_id}
-                                onChange={(e) =>
-                                    handleInputChange(
-                                        "location_id",
-                                        e.target.value
-                                    )
-                                }
-                            />
-                        </div>
-
-                        <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-sm">
+                        {/* Media Section */}
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
                             <FileUpload
                                 data={data}
                                 setData={setData}
                                 errors={errors}
                                 clearErrors={clearErrors}
                                 field="images"
-                                label="Media / Images"
+                                label="Product Images"
                                 multiple={true}
+                                className="text-[13px]"
                             />
                         </div>
 
-                        <div className="grid grid-cols-3 gap-2">
+                        {/* Form Submission */}
+                        <div className="flex gap-3 pt-6 border-t border-slate-100">
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="col-span-2 bg-orange-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-emerald-700 transition-all"
+                                className="flex-1 bg-[#FF9F43] text-white h-12 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-[#e68a30] active:scale-95 transition-all disabled:opacity-50"
                             >
-                                <Save size={18} />{" "}
-                                {processing
-                                    ? "Publishing..."
-                                    : "Publish Product"}
+                                <Save size={18} />
+                                {processing ? "Publishing..." : "Publish Product"}
                             </button>
                             <button
                                 type="button"
@@ -496,9 +433,9 @@ export default function Create({ categories, subCategories }) {
                                     reset();
                                     clearErrors();
                                 }}
-                                className="bg-slate-200 text-slate-700 py-3 rounded-xl font-bold hover:bg-slate-300 transition-all"
+                                className="w-20 bg-slate-100 text-slate-600 h-12 rounded-xl font-bold hover:bg-slate-200 active:scale-95 transition-all disabled:opacity-50"
                             >
-                                Clear
+                                Reset
                             </button>
                         </div>
                     </div>

@@ -12,9 +12,8 @@ use Inertia\Inertia;
 class ReturnOrderController extends Controller
 {
     /**
-     * Display the list of orders eligible for return.
+     * Display the list of return requests and eligible orders.
      */
-    // In ReturnOrderController.php
     public function returnOrder()
     {
         $returns = ReturnRequest::with(['order.items.product.files'])
@@ -22,8 +21,16 @@ class ReturnOrderController extends Controller
             ->latest()
             ->get();
 
+        // Only orders that are delivered can be returned
+        $orders = \App\Models\Order::with(['items.product.files'])
+            ->where('user_id', Auth::id())
+            ->where('status', 'delivered')
+            ->latest()
+            ->get();
+
         return Inertia::render('User/Order/Return', [
             'returns' => $returns,
+            'orders' => $orders,
         ]);
     }
 
@@ -33,23 +40,28 @@ class ReturnOrderController extends Controller
     public function returnRequest(Request $request)
     {
         $validated = $request->validate([
-            'order_id' => 'required|exists:orders,order_number',
+            'order_id' => 'required|exists:orders,id',
             'reason' => 'required|string',
             'description' => 'required|string|min:10',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:5120',
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
+
+        // 1. Check if user owns the order
+        $order = \App\Models\Order::where('id', $validated['order_id'])
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
 
         // 2. Handle File Upload
         $imagePath = null;
         if ($request->hasFile('image')) {
-
-            $imagePath = Helper::uploadFile('returns', $request->file('image'));
+            $upload = Helper::uploadFile('returns', $request->file('image'), false);
+            $imagePath = $upload['original'] ?? null;
         }
 
         // 3. Create the Return Request record
         ReturnRequest::create([
             'user_id' => Auth::id(),
-            'order_id' => $validated['order_id'],
+            'order_id' => $order->id,
             'reason' => $validated['reason'],
             'description' => $validated['description'],
             'image_path' => $imagePath,

@@ -115,7 +115,7 @@ export default function Create() {
         <AdminLayout>
             <Head title="Bulk Category Creation" />
 
-            <div className="p-6 bg-[#F8F9FB] min-h-screen">
+            <div className="p-8 bg-[#F8FAFC] min-h-screen">
                 {/* Header Area */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <div>
@@ -139,7 +139,7 @@ export default function Create() {
                         </button>
                         <Link
                             href={route("categories.index")}
-                            className="flex items-center gap-2 bg-[#1B2838] text-white px-4 py-2 rounded-lg hover:bg-[#2c3e50] transition font-bold text-[13px] shadow-sm"
+                            className="flex items-center gap-2 bg-[#1B2838] text-white px-4 py-2 rounded-lg hover:bg-[#2c3e50] transition-all font-bold text-[13px] shadow-sm"
                         >
                             <ChevronLeft size={19} /> Back to List
                         </Link>
@@ -150,7 +150,7 @@ export default function Create() {
                     {data.categories.map((cat, index) => (
                         <div
                             key={index}
-                            className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 relative group transition-all hover:border-[#FF9F43]/40"
+                            className="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 relative group transition-all hover:border-[#FF9F43]/40"
                         >
                             {data.categories.length > 1 && (
                                 <button

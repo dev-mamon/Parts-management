@@ -30,8 +30,10 @@ class IndexController extends Controller
         });
 
         $categories = Category::query()
+            ->with(['subCategories']) // Eager load sub categories
             ->withCount('subCategories')
             ->when($request->search, fn ($q, $s) => $q->where('name', 'like', "%$s%"))
+            ->when($request->status && $request->status !== 'all', fn ($q, $s) => $q->where('status', $request->status))
             ->latest()
             ->paginate($request->per_page ?? 10)
             ->withQueryString();
@@ -39,7 +41,7 @@ class IndexController extends Controller
         return Inertia::render('Admin/Category/Index', [
             'category' => $categories,
             'counts' => $counts,
-            'filters' => $request->only(['search', 'per_page']),
+            'filters' => $request->only(['search', 'status', 'per_page']),
         ]);
     }
 

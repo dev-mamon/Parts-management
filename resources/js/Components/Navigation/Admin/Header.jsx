@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { router } from "@inertiajs/react";
+import { router, usePage, Link } from "@inertiajs/react";
 import { Search, Bell, ChevronDown, Menu, User, LogOut } from "lucide-react";
 
 const Header = ({ onMenuClick }) => {
+    const { auth } = usePage().props;
+    const user = auth.user;
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
 
@@ -38,7 +40,7 @@ const Header = ({ onMenuClick }) => {
 
                 <div className="truncate">
                     <h1 className="text-lg md:text-xl lg:text-2xl font-bold text-slate-900 truncate">
-                        Welcome, Bay Mechanic
+                        Welcome, {user.first_name} {user.last_name}
                     </h1>
                     <p className="hidden sm:block text-xs md:text-sm text-slate-400 mt-0.5 md:mt-1 truncate">
                         Tracking auto parts orders today.
@@ -57,14 +59,14 @@ const Header = ({ onMenuClick }) => {
                     <input
                         type="text"
                         placeholder="Search parts..."
-                        className="w-[300px] 2xl:w-[450px] pl-11 pr-4 py-2.5 rounded-full bg-gray-50 border border-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-orange-100 transition-all"
+                        className="w-[300px] 2xl:w-[450px] pl-11 pr-4 py-2.5 rounded-full bg-gray-50 border border-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF9F43]/10 focus:border-[#FF9F43]/20 transition-all"
                     />
                 </div>
 
                 {/* Notification Bell */}
                 <button className="relative p-2.5 md:p-3 rounded-full bg-gray-50 text-slate-600 hover:bg-gray-100 transition shrink-0">
                     <Bell size={20} />
-                    <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-orange-500 border-2 border-white rounded-full" />
+                    <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-[#FF9F43] border-2 border-white rounded-full" />
                 </button>
 
                 {/* Profile Dropdown */}
@@ -73,19 +75,25 @@ const Header = ({ onMenuClick }) => {
                         onClick={() => setOpen(!open)}
                         className="flex items-center gap-2 p-1 md:px-3 md:py-1.5 rounded-full bg-gray-50 border border-transparent hover:border-gray-200 cursor-pointer transition"
                     >
-                        <img
-                            src="https://i.pravatar.cc/100?u=jane"
-                            alt="User"
-                            className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover shadow-sm"
-                        />
+                        {user.profile_photo ? (
+                            <img
+                                src={`/${user.profile_photo}`}
+                                alt="User"
+                                className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover shadow-sm"
+                            />
+                        ) : (
+                            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#FF9F43]/10 flex items-center justify-center text-[#FF9F43]">
+                                <User size={20} />
+                            </div>
+                        )}
 
                         {/* Text hidden on mobile */}
                         <div className="leading-tight hidden md:block">
                             <p className="text-sm font-bold text-slate-900 truncate max-w-[100px]">
-                                Jane Morgan
+                                {user.first_name} {user.last_name}
                             </p>
-                            <p className="text-[11px] text-slate-500 truncate max-w-[120px]">
-                                Admin
+                            <p className="text-[11px] text-[#FF9F43] font-bold uppercase tracking-wider truncate max-w-[120px]">
+                                {user.user_type || 'Admin'}
                             </p>
                         </div>
 
@@ -103,17 +111,21 @@ const Header = ({ onMenuClick }) => {
                             {/* Mobile User Info inside dropdown */}
                             <div className="md:hidden px-5 py-3 bg-gray-50 border-b border-gray-100">
                                 <p className="text-sm font-bold text-slate-900">
-                                    Jane Morgan
+                                    {user.first_name} {user.last_name}
                                 </p>
                                 <p className="text-xs text-slate-500">
-                                    janemorgan@gmail.com
+                                    {user.email}
                                 </p>
                             </div>
 
-                            <button className="w-full flex items-center gap-3 px-5 py-3.5 text-sm text-slate-700 hover:bg-gray-50 transition">
+                            <Link 
+                                href="/profile-settings"
+                                className="w-full flex items-center gap-3 px-5 py-3.5 text-sm text-slate-700 hover:bg-gray-50 transition"
+                                onClick={() => setOpen(false)}
+                            >
                                 <User size={18} className="text-slate-400" />
                                 <span>My Profile</span>
-                            </button>
+                            </Link>
 
                             <div className="h-px bg-gray-100" />
 

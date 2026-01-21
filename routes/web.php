@@ -2,7 +2,16 @@
 
 use App\Http\Controllers\Admin\Blog\IndexController as BlogController;
 use App\Http\Controllers\Admin\Category\IndexController as CategoryController;
+use App\Http\Controllers\Admin\Order\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\ReturnRequest\ReturnRequestController as AdminReturnRequestController;
 use App\Http\Controllers\Admin\Product\IndexController as ProductController;
+use App\Http\Controllers\Admin\Settings\EmailSettingController;
+use App\Http\Controllers\Admin\Settings\PaymentSettingController;
+use App\Http\Controllers\Admin\Settings\ProfileSettingController;
+use App\Http\Controllers\Admin\Lead\LeadController;
+use App\Http\Controllers\Admin\Support\SupportController as AdminSupportController;
+use App\Http\Controllers\User\Support\SupportController as UserSupportController;
+use App\Http\Controllers\User\Quote\QuoteController;
 use App\Http\Controllers\API\User\Blog\IndexController as UserBlogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\User\Booking\PaymentController;
@@ -54,6 +63,11 @@ Route::middleware('auth')->group(function () {
     Route::post('favourite/parts', [FavouriteController::class, 'toggle'])->name('parts.favourite');
     Route::resource('favourites', FavouriteController::class);
 
+    Route::post('quotes/toggle', [QuoteController::class, 'toggle'])->name('quotes.toggle');
+    Route::post('quotes/from-cart', [QuoteController::class, 'storeFromCart'])->name('quotes.store-from-cart');
+    Route::post('quotes/{quote}/convert', [QuoteController::class, 'convertToOrder'])->name('quotes.convert');
+    Route::resource('quotes', QuoteController::class);
+
     Route::resource('carts', CartController::class);
 
     Route::post('/checkout', [PaymentController::class, 'checkout'])->name('checkout.process');
@@ -70,6 +84,36 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('admin/blogs', BlogController::class);
 
+    // Admin Orders
+    Route::get('/admin/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
+    Route::get('/admin/orders/{order}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
+    Route::patch('/admin/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.update-status');
+
+    // Admin Return Management
+    Route::get('/admin/returns', [AdminReturnRequestController::class, 'index'])->name('admin.returns.index');
+    Route::get('/admin/returns/{returnRequest}', [AdminReturnRequestController::class, 'show'])->name('admin.returns.show');
+    Route::patch('/admin/returns/{returnRequest}/status', [AdminReturnRequestController::class, 'updateStatus'])->name('admin.returns.update-status');
+
+    // Admin Lead Management
+    Route::delete('/admin/leads/bulk-destroy', [LeadController::class, 'bulkDestroy'])->name('admin.leads.bulk-destroy');
+    Route::get('/admin/leads', [LeadController::class, 'index'])->name('admin.leads.index');
+    Route::get('/admin/leads/create', [LeadController::class, 'create'])->name('admin.leads.create');
+    Route::post('/admin/leads', [LeadController::class, 'store'])->name('admin.leads.store');
+    Route::get('/admin/leads/{lead}', [LeadController::class, 'show'])->name('admin.leads.show');
+    Route::get('/admin/leads/{lead}/edit', [LeadController::class, 'edit'])->name('admin.leads.edit');
+    Route::put('/admin/leads/{lead}', [LeadController::class, 'update'])->name('admin.leads.update');
+
+    // Settings
+    Route::get('/email-settings', [EmailSettingController::class, 'index'])->name('admin.settings.email');
+    Route::post('/email-settings', [EmailSettingController::class, 'update'])->name('admin.settings.email.update');
+
+    Route::get('/payment-settings', [PaymentSettingController::class, 'index'])->name('admin.settings.payment');
+    Route::post('/payment-settings', [PaymentSettingController::class, 'update'])->name('admin.settings.payment.update');
+
+    Route::get('/profile-settings', [ProfileSettingController::class, 'index'])->name('admin.settings.profile');
+    Route::post('/profile-settings', [ProfileSettingController::class, 'update'])->name('admin.settings.profile.update');
+    Route::post('/profile-settings/password', [ProfileSettingController::class, 'updatePassword'])->name('admin.settings.profile.password');
+
     // history
     Route::get('/orders/active', [ActiveOrderController::class, 'index'])->name('orders.active');
     // Order History
@@ -82,10 +126,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders/return', [ReturnOrderController::class, 'returnOrder'])->name('orders.return');
     // -- add return request
     Route::post('/orders/return/request', [ReturnOrderController::class, 'returnRequest'])->name('orders.return.request');
+    // Admin Support Management
+    Route::get('/admin/support', [AdminSupportController::class, 'index'])->name('admin.support.index');
+    Route::patch('/admin/support/{ticket}/status', [AdminSupportController::class, 'updateStatus'])->name('admin.support.status.update');
+    Route::delete('/admin/support/bulk-destroy', [AdminSupportController::class, 'bulkDestroy'])->name('admin.support.bulk-destroy');
+    Route::delete('/admin/support/{ticket}', [AdminSupportController::class, 'destroy'])->name('admin.support.destroy');
+
+    // User Support
+    Route::get('/contact', [UserSupportController::class, 'index'])->name('contact.index');
+    Route::post('/contact', [UserSupportController::class, 'store'])->name('contact.store');
+
     // blog
     Route::get('/blogs', [UserBlogController::class, 'index'])->name('blogs.index');
     Route::get('/blogs/{id}', [UserBlogController::class, 'show'])->name('blogs.show');
-
 });
 
 Route::fallback(function () {

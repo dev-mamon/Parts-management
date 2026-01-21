@@ -14,6 +14,7 @@ use App\Models\ProductFile;
 use App\Models\SubCategory;
 use App\Services\AdminProductSnapshot;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -23,20 +24,27 @@ class IndexController extends Controller
 {
     public function index(Request $request)
     {
-        $counts = cache()->remember('product_counts', 300, function () {
+        // Optimized File Cache - Fast Count Queries (No Redis Required)
+        $counts = Cache::remember('product_counts', 3600, function () {
+            // Single query to get all counts - much faster than multiple queries
             $data = Product::selectRaw("
-            COUNT(*) as all_count,
-            SUM(visibility = 'public') as published,
-            SUM(visibility = 'draft') as draft,
-            SUM(visibility = 'private') as private
-        ")->first();
+                COUNT(*) as all_count,
+                SUM(CASE WHEN visibility = 'public' THEN 1 ELSE 0 END) as published,
+                SUM(CASE WHEN visibility = 'draft' THEN 1 ELSE 0 END) as draft,
+                SUM(CASE WHEN visibility = 'private' THEN 1 ELSE 0 END) as private
+            ")->first();
+
+            // Separate optimized query for no_image count
+            $noImageCount = Cache::remember('product_no_image_count', 3600, function () {
+                return Product::whereDoesntHave('files')->count();
+            });
 
             return [
                 'all' => $data->all_count,
                 'published' => (int) $data->published,
                 'draft' => (int) $data->draft,
                 'private' => (int) $data->private,
-                'no_image' => Product::whereDoesntHave('files')->count(),
+                'no_image' => $noImageCount,
             ];
         });
 
@@ -132,7 +140,8 @@ class IndexController extends Controller
 
             DB::commit();
             AdminProductSnapshot::flush();
-            cache()->forget('product_counts');
+            Cache::forget('product_counts');
+            Cache::forget('product_no_image_count');
 
             return redirect()->route('products.index')
                 ->with('success', 'Product created successfully.');
@@ -225,7 +234,8 @@ class IndexController extends Controller
 
             DB::commit();
             AdminProductSnapshot::flush();
-            cache()->forget('product_counts');
+            Cache::forget('product_counts');
+            Cache::forget('product_no_image_count');
 
             return redirect()->route('products.index')->with('success', 'Product updated successfully.');
 

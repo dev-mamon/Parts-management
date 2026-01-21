@@ -105,7 +105,7 @@ const Pagination = ({ meta }) => {
                         onClick={() => handlePageChange(getPageUrl(page))}
                         className={`w-8 h-8 flex items-center justify-center font-medium text-[14px] rounded-[4px] border transition-all ${
                             current_page === page
-                                ? "bg-[#4D7C5F] dark:bg-emerald-600 text-white border-[#4D7C5F] dark:border-emerald-600 shadow-sm"
+                                ? "bg-[#FF9F43] dark:bg-[#FF9F43] text-white border-[#FF9F43] dark:border-[#FF9F43] shadow-sm"
                                 : "text-[#64748B] dark:text-gray-400 border-[#E2E8F0] dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
                         }`}
                     >

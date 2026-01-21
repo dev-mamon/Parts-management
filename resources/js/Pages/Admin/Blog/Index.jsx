@@ -29,7 +29,9 @@ export default function Index({ blogs }) {
         selectAllGlobal,
         setSelectAllGlobal,
         clearSelection,
-    } = TableManager("blogs.index", blogs?.data || []);
+    } = TableManager("blogs.index", blogs?.data || [], {
+        only: ["blogs"]
+    });
 
     const skeletonRows = Array.from({ length: 5 });
     const blogData = blogs?.data || [];

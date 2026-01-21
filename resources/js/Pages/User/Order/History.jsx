@@ -14,16 +14,53 @@ import {
     XCircle,
 } from "lucide-react";
 
-// --- Skeleton Component ---
-const OrderCardSkeleton = () => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-        <div className="flex justify-between mb-4">
-            <Skeleton className="h-6 w-32" />
+// --- Premium Skeleton Component ---
+const HistoryCardSkeleton = () => (
+    <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-6 md:p-8 mb-8">
+        <div className="flex justify-between items-center mb-6 pb-6 border-b border-slate-50">
+            <div className="flex gap-4 items-center">
+                <Skeleton className="w-12 h-12 rounded-xl" />
+                <div className="space-y-2">
+                    <Skeleton className="h-6 w-40" />
+                </div>
+            </div>
             <Skeleton className="h-8 w-24 rounded-full" />
         </div>
-        <Skeleton className="h-24 w-full rounded-xl mb-4" />
-        <div className="space-y-2">
-            <Skeleton className="h-16 w-full rounded-lg" />
+        
+        <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-8">
+                <div className="space-y-1">
+                    <Skeleton className="h-2 w-10" />
+                    <Skeleton className="h-4 w-20" />
+                </div>
+                <div className="space-y-1 border-l border-slate-50 pl-8">
+                    <Skeleton className="h-2 w-10" />
+                    <Skeleton className="h-4 w-20" />
+                </div>
+            </div>
+            <div className="text-right space-y-1">
+                <Skeleton className="h-2 w-16 ml-auto" />
+                <Skeleton className="h-8 w-24 ml-auto" />
+            </div>
+        </div>
+
+        <div className="space-y-3">
+            {[1].map((i) => (
+                <div key={i} className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
+                    <div className="flex items-center gap-4">
+                        <Skeleton className="w-16 h-16 rounded-xl" />
+                        <div className="space-y-2">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-3 w-48" />
+                            <Skeleton className="h-3 w-12" />
+                        </div>
+                    </div>
+                    <div className="space-y-1">
+                        <Skeleton className="h-2 w-12 ml-auto" />
+                        <Skeleton className="h-4 w-16 ml-auto" />
+                    </div>
+                </div>
+            ))}
         </div>
     </div>
 );
@@ -33,17 +70,22 @@ export default function OrderHistory() {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
 
-    useEffect(() => {
-        const timer = setTimeout(() => setIsLoading(false), 800);
-        return () => clearTimeout(timer);
-    }, []);
-
     const orderList = Array.isArray(orders) ? orders : [];
 
     // Filter for History (Delivered and Cancelled)
     const historicalOrders = orderList.filter((order) =>
         ["delivered", "cancelled"].includes(order.status),
     );
+
+    useEffect(() => {
+        // যদি হিস্টোরি একদম খালি থাকে, তবে লোডিং সরাসরি ফলস করে দেব যাতে স্কেলিটন না আসে
+        if (historicalOrders.length === 0) {
+            setIsLoading(false);
+        } else {
+            const timer = setTimeout(() => setIsLoading(false), 800);
+            return () => clearTimeout(timer);
+        }
+    }, [historicalOrders.length]);
 
     const filteredOrders = historicalOrders.filter((order) =>
         order.order_number.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -108,13 +150,11 @@ export default function OrderHistory() {
                         </div>
                     </div>
 
+                    {/* Main Content Area */}
                     {isLoading ? (
                         <div className="space-y-6">
-                            {(historicalOrders.length > 0
-                                ? historicalOrders.slice(0, 2)
-                                : [1, 2]
-                            ).map((_, i) => (
-                                <OrderCardSkeleton key={i} />
+                            {historicalOrders.slice(0, 2).map((_, i) => (
+                                <HistoryCardSkeleton key={i} />
                             ))}
                         </div>
                     ) : filteredOrders.length === 0 ? (
@@ -147,8 +187,7 @@ export default function OrderHistory() {
                                                 </div>
                                                 <div>
                                                     <h3 className="text-lg font-bold text-slate-700">
-                                                        Order{" "}
-                                                        {order.order_number}
+                                                        Order {order.order_number}
                                                     </h3>
                                                 </div>
                                             </div>
@@ -167,11 +206,7 @@ export default function OrderHistory() {
                                                         Date
                                                     </span>
                                                     <span className="text-sm font-black text-slate-900">
-                                                        {new Date(
-                                                            order.created_at,
-                                                        ).toLocaleDateString(
-                                                            "en-CA",
-                                                        )}
+                                                        {new Date(order.created_at).toLocaleDateString("en-CA")}
                                                     </span>
                                                 </div>
                                                 <div className="flex flex-col border-l border-gray-100 pl-8">
@@ -179,9 +214,7 @@ export default function OrderHistory() {
                                                         Items
                                                     </span>
                                                     <span className="text-sm font-black text-slate-900">
-                                                        {order.items?.length ||
-                                                            0}{" "}
-                                                        parts
+                                                        {order.items?.length || 0} parts
                                                     </span>
                                                 </div>
                                             </div>
@@ -190,14 +223,12 @@ export default function OrderHistory() {
                                                     Total Amount
                                                 </p>
                                                 <p className="text-2xl font-black text-slate-900">
-                                                    $
-                                                    {parseFloat(
-                                                        order.total_amount,
-                                                    ).toFixed(2)}
+                                                    ${parseFloat(order.total_amount).toFixed(2)}
                                                 </p>
                                             </div>
                                         </div>
 
+                                        {/* Items List */}
                                         <div className="px-6 pb-6">
                                             <div className="space-y-3">
                                                 {order.items?.map((item) => (
@@ -207,8 +238,7 @@ export default function OrderHistory() {
                                                     >
                                                         <div className="flex items-center gap-4">
                                                             <div className="w-16 h-16 bg-white rounded-lg border border-gray-200 overflow-hidden flex-shrink-0">
-                                                                {item.product
-                                                                    ?.files?.[0] ? (
+                                                                {item.product?.files?.[0] ? (
                                                                     <img
                                                                         src={`/${item.product.files[0].file_path}`}
                                                                         className="w-full h-full object-cover"
@@ -222,25 +252,13 @@ export default function OrderHistory() {
                                                             </div>
                                                             <div>
                                                                 <h5 className="font-black text-slate-900 text-sm uppercase">
-                                                                    {
-                                                                        item
-                                                                            .product
-                                                                            ?.sku
-                                                                    }
+                                                                    {item.product?.sku}
                                                                 </h5>
                                                                 <p className="text-[11px] text-slate-500 font-medium leading-tight">
-                                                                    {
-                                                                        item
-                                                                            .product
-                                                                            ?.description
-                                                                    }
+                                                                    {item.product?.description}
                                                                 </p>
                                                                 <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">
-                                                                    QTY:{" "}
-                                                                    {item.quantity <
-                                                                    10
-                                                                        ? `0${item.quantity}`
-                                                                        : item.quantity}
+                                                                    QTY: {item.quantity < 10 ? `0${item.quantity}` : item.quantity}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -249,10 +267,7 @@ export default function OrderHistory() {
                                                                 Total
                                                             </p>
                                                             <p className="font-black text-slate-900 text-sm">
-                                                                $
-                                                                {parseFloat(
-                                                                    item.price,
-                                                                ).toFixed(2)}
+                                                                ${parseFloat(item.price).toFixed(2)}
                                                             </p>
                                                         </div>
                                                     </div>

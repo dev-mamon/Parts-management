@@ -45,7 +45,7 @@ const MENU = [
     {
         title: "SUPPORT",
         items: [
-            { label: "Blog", icon: BookOpen, path: "/blogs" },
+            // { label: "Blog", icon: BookOpen, path: "/blogs" },
             { label: "Contact Us", icon: Headset, path: "/contact" },
         ],
     },
@@ -96,7 +96,8 @@ export default function Sidebar({ isCollapsed }) {
                         {/* Items Container - Reduced space-y from 1.5 to 1 */}
                         <div className="space-y-0.5">
                             {group.items.map(({ label, icon: Icon, path }) => {
-                                const active = url.startsWith(path);
+                                const currentPath = url.split('?')[0];
+                                const active = currentPath === path;
 
                                 return (
                                     <Link

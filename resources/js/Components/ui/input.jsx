@@ -38,6 +38,7 @@ const Input = React.forwardRef(
                             "flex w-full rounded-[12px] border bg-black/40 px-5 py-2 text-white transition-all duration-200",
                             "placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent",
                             "border-white/20 backdrop-blur-md",
+                            error ? "border-red-500 ring-1 ring-red-500/20" : "border-white/20 hover:border-white/40",
                             Icon ? "pl-14" : "pl-5",
                             isTextArea
                                 ? "min-h-[120px] py-4 resize-none"

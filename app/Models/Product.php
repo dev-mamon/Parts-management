@@ -52,4 +52,9 @@ class Product extends Model
     {
         return $this->hasMany(Cart::class);
     }
+
+    public function quoteItems()
+    {
+        return $this->hasMany(QuoteItem::class);
+    }
 }
