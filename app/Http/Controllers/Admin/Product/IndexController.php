@@ -259,4 +259,66 @@ class IndexController extends Controller
             return back()->withErrors(['error' => 'File deletion failed: '.$e->getMessage()]);
         }
     }
+
+    /**
+     * Delete a product and its associated files
+     */
+    public function destroy(Product $product)
+    {
+        DB::beginTransaction();
+        try {
+            // Delete associated files from storage
+            foreach ($product->files as $file) {
+                Helper::deleteFile($file->file_path);
+            }
+            
+            // Delete the product (cascading deletes should handle fitments/part numbers if set up)
+            $product->delete();
+
+            DB::commit();
+            AdminProductSnapshot::flush();
+            Cache::forget('product_counts');
+            Cache::forget('product_no_image_count');
+
+            return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Delete Error: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Deletion failed: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Delete multiple products at once
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:products,id'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $products = Product::whereIn('id', $request->ids)->with('files')->get();
+
+            foreach ($products as $product) {
+                foreach ($product->files as $file) {
+                    Helper::deleteFile($file->file_path);
+                }
+                $product->delete();
+            }
+
+            DB::commit();
+            AdminProductSnapshot::flush();
+            Cache::forget('product_counts');
+            Cache::forget('product_no_image_count');
+
+            return redirect()->route('products.index')->with('success', 'Selected products deleted successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Bulk Delete Error: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Bulk deletion failed: ' . $e->getMessage()]);
+        }
+    }
 }

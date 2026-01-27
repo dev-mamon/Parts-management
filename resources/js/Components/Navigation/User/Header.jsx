@@ -10,15 +10,12 @@ import {
     LogOut,
 } from "lucide-react";
 
-const Header = ({ onMenuClick }) => {
+const Header = ({ onMenuClick, onCartClick }) => {
     const { props } = usePage();
     const cartCount = props.cartCount || 0;
     const user = props.auth.user;
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
-
-    // Unique token generator (You can also get this from backend)
-    const cartToken = btoa(user?.id + "-cart-session");
 
     const handleLogout = () => {
         router.post(route("logout"));
@@ -35,98 +32,120 @@ const Header = ({ onMenuClick }) => {
     }, []);
 
     return (
-        <header className="h-24 bg-white flex items-center justify-between px-10 border-b border-gray-100">
-            <div className="flex items-center gap-6">
+        <header className="h-16 md:h-24 bg-white flex items-center justify-between px-3 md:px-10 border-b border-gray-100 sticky top-0 z-[50]">
+            <div className="flex items-center gap-2 md:gap-6 min-w-0">
                 <button
                     onClick={onMenuClick}
-                    className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-gray-100"
+                    className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-gray-100 transition-colors shrink-0"
                 >
-                    <Menu size={24} />
+                    <Menu size={20} md:size={22} />
                 </button>
 
-                <div>
-                    <h1 className="text-2xl font-bold text-slate-900">
-                        Welcome back, {user?.name || "Guest"}
+                <div className="flex flex-col min-w-0">
+                    <h1 className="text-base md:text-2xl font-bold text-slate-900 leading-tight truncate">
+                        Welcome, {user?.first_name || "User"}
                     </h1>
-                    <p className="text-sm text-slate-400 mt-1">
+                    <p className="text-[10px] md:text-sm text-slate-400 mt-0.5 hidden sm:block leading-relaxed truncate">
                         Here's what's happening with your auto parts orders today.
                     </p>
                 </div>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-1.5 md:gap-6 shrink-0">
                 <div className="relative hidden xl:block">
                     <Search
-                        size={20}
-                        className="absolute left-5 top-1/2 -translate-y-1/2 text-red-700"
+                        size={18}
+                        className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400"
                     />
                     <input
                         type="text"
                         placeholder="Search here..."
-                        className="w-[520px] pl-12 pr-4 py-3 rounded-full bg-gray-50 border border-gray-100 text-slate-500 focus:outline-none"
+                        className="w-[350px] 2xl:w-[450px] pl-12 pr-4 py-3 rounded-full bg-[#F8F9FA] border-none text-slate-500 focus:outline-none placeholder:text-slate-400 text-sm"
                     />
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <Link
-                        href={route('carts.index', { token: cartToken })}
-                        className="relative p-4 rounded-full bg-gray-50 text-red-700 hover:bg-gray-100 transition"
+                <div className="flex items-center gap-1 md:gap-3">
+                    <button
+                        onClick={onCartClick}
+                        className="relative p-2 md:p-3.5 rounded-full bg-[#F8F9FA] text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-300"
                     >
-                        <ShoppingCart size={22} />
+                        <ShoppingCart size={18} className="md:size-[22px]" />
                         {cartCount > 0 && (
-                            <span className="absolute top-2 right-2 min-w-[20px] h-5 px-1 flex items-center justify-center bg-orange-500 border-2 border-white rounded-full text-[10px] font-bold text-white">
+                            <span className="absolute -top-1 -right-1 min-w-[16px] md:min-w-[18px] h-4 md:h-4.5 px-1 md:px-1.5 flex items-center justify-center bg-red-600 border-2 border-white rounded-full text-[8px] md:text-[9px] font-black text-white">
                                 {cartCount}
                             </span>
                         )}
-                    </Link>
+                    </button>
 
-                    <button className="relative p-4 rounded-full bg-gray-50 text-red-700 hover:bg-gray-100 transition">
-                        <Bell size={22} />
-                        <span className="absolute top-3 right-3 w-3 h-3 bg-orange-400 border-2 border-white rounded-full" />
+                    <button className="relative p-2 md:p-3.5 rounded-full bg-[#F8F9FA] text-slate-500 hover:bg-gray-100 transition-all duration-300">
+                        <Bell size={18} className="md:size-[22px]" />
+                        <span className="absolute top-2 md:top-2.5 right-2 md:right-2.5 w-2 md:w-2.5 h-2 md:h-2.5 bg-orange-400 border-2 border-white rounded-full" />
                     </button>
                 </div>
 
+                {/* Optimized User Profile Section matching Image */}
                 <div ref={dropdownRef} className="relative">
                     <div
                         onClick={() => setOpen(!open)}
-                        className="flex items-center gap-3 px-4 py-2 rounded-full bg-gray-50 border border-gray-100 cursor-pointer hover:bg-gray-100 transition"
+                        className="flex items-center gap-2 md:gap-4 p-1 md:p-1.5 pl-1 md:pl-2 pr-1 md:pr-6 rounded-full bg-[#f8f9fa] hover:bg-[#f1f3f5] cursor-pointer transition-all duration-300"
                     >
-                        <div className="w-12 h-12 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center">
-                            <User size={24} className="text-slate-500" />
+                        {/* Circular Avatar */}
+                        <div className="w-8 h-8 md:w-11 md:h-11 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center shrink-0 border-2 border-white shadow-sm font-bold text-slate-500">
+                            {user?.profile_photo ? (
+                                <img 
+                                    src={`/${user.profile_photo}`} 
+                                    className="w-full h-full object-cover" 
+                                    alt="Profile" 
+                                />
+                            ) : (
+                                <User size={16} md:size={20} />
+                            )}
                         </div>
 
-                        <div className="leading-tight hidden md:block">
-                            <p className="text-base font-bold text-slate-900 truncate max-w-[120px]">
-                                {user?.name}
+                        {/* Profile Info - Ultra Clean Typography */}
+                        <div className="leading-tight hidden lg:block">
+                            <p className="text-[14px] font-extrabold text-[#111827] tracking-tight truncate max-w-[100px]">
+                                {user?.first_name} {user?.last_name}
                             </p>
-                            <p className="text-sm text-slate-500 truncate max-w-[120px]">
+                            <p className="text-[12px] text-[#718096] font-medium tracking-tight mt-0.5 truncate max-w-[100px]">
                                 {user?.email}
                             </p>
                         </div>
 
                         <ChevronDown
-                            size={20}
-                            className={`ml-2 text-slate-800 transition-transform ${
+                            size={14}
+                            strokeWidth={3}
+                            className={`hidden md:block ml-0.5 text-[#64748B] transition-transform duration-300 ${
                                 open ? "rotate-180" : ""
                             }`}
                         />
                     </div>
 
                     {open && (
-                        <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden z-50">
-                            <button className="w-full flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-gray-50 transition">
-                                <User size={18} />
-                                <span className="font-medium">My Profile</span>
-                            </button>
+                        <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-gray-100 overflow-hidden z-50 py-1 animate-in fade-in slide-in-from-top-2">
+                            {/* Mobile only info */}
+                            <div className="px-5 py-4 border-b border-gray-50 lg:hidden">
+                                <p className="text-sm font-bold text-slate-900 truncate">{user?.first_name} {user?.last_name}</p>
+                                <p className="text-[11px] text-slate-400 truncate mt-0.5">{user?.email}</p>
+                            </div>
+                            
+                            <Link 
+                                href={route('settings.index')}
+                                onClick={() => setOpen(false)}
+                                className="w-full flex items-center gap-3 px-5 py-4 text-slate-700 hover:bg-gray-50 transition"
+                            >
+                                <User size={18} className="text-slate-400" />
+                                <span className="font-semibold text-sm">My Profile</span>
+                            </Link>
 
-                            <div className="h-px bg-gray-100" />
+                            <div className="h-px bg-gray-100 mx-3" />
 
                             <button
                                 onClick={handleLogout}
                                 className="w-full flex items-center gap-3 px-5 py-4 text-red-600 hover:bg-red-50 transition"
                             >
                                 <LogOut size={18} />
-                                <span className="font-medium">Logout</span>
+                                <span className="font-semibold text-sm">Logout</span>
                             </button>
                         </div>
                     )}

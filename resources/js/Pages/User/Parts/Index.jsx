@@ -39,13 +39,13 @@ const SearchInput = memo(({ initialValue, onSearch }) => {
 
     return (
         <div className="relative flex-1 min-w-full sm:min-w-[300px]">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#FF9F43] w-5 h-5 pointer-events-none" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#A80000] w-5 h-5 pointer-events-none" />
             <input
                 type="text"
                 value={localValue}
                 onChange={handleChange}
                 placeholder="Search description or SKU..."
-                className="w-full pl-12 pr-12 py-3 rounded-full border border-slate-200 shadow-sm focus:ring-4 focus:ring-[#FF9F43]/10 focus:border-[#FF9F43] bg-white outline-none transition-all text-sm font-medium text-slate-700 placeholder:text-slate-400"
+                className="w-full pl-12 pr-12 py-3 rounded-full border border-slate-200 shadow-sm focus:ring-4 focus:ring-[#A80000]/10 focus:border-[#A80000] bg-white outline-none transition-all text-sm font-medium text-slate-700 placeholder:text-slate-400"
             />
             {localValue && (
                 <button
@@ -66,11 +66,11 @@ const FilterDropdown = memo(
     ({ label, filterKey, options, currentValue, onFilter }) => {
         return (
             <DropdownMenu modal={false}>
-                <DropdownMenuTrigger className="bg-white px-5 py-3 rounded-full shadow-sm flex items-center gap-3 min-w-[140px] justify-between border border-slate-200 hover:border-[#FF9F43]/30 hover:bg-slate-50/50 outline-none focus:outline-none focus:ring-0 group select-none">
-                    <span className={cn("text-xs font-bold truncate max-w-[100px] uppercase tracking-wide", currentValue ? "text-[#FF9F43]" : "text-slate-600 group-hover:text-slate-900")}>
+                <DropdownMenuTrigger className="bg-white px-5 py-3 rounded-full shadow-sm flex items-center gap-3 min-w-[140px] justify-between border border-slate-200 hover:border-[#A80000]/30 hover:bg-slate-50/50 outline-none focus:outline-none focus:ring-0 group select-none">
+                    <span className={cn("text-xs font-bold truncate max-w-[100px] uppercase tracking-wide", currentValue ? "text-[#A80000]" : "text-slate-600 group-hover:text-slate-900")}>
                         {currentValue || label}
                     </span>
-                    <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0 group-hover:text-[#FF9F43] transition-colors" />
+                    <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0 group-hover:text-[#A80000] transition-colors" />
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent
@@ -113,7 +113,7 @@ const ProductRow = memo(
         const firstImage = product.files?.[0] || null;
 
         // Dynamic Badge Styling
-        const categoryName = product.sub_category?.name?.toUpperCase() || "";
+        const categoryName = product.subCategory?.name?.toUpperCase() || "";
         const isOEM = categoryName.includes("OEM");
         const isAftermarket = categoryName.includes("AFTERMARKET");
 
@@ -148,13 +148,13 @@ const ProductRow = memo(
                         {/* Image Container */}
                         <div 
                             onClick={() => onImageClick(product)}
-                            className="w-24 h-16 rounded-2xl overflow-hidden bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm relative group-hover:border-[#FF9F43]/40 cursor-pointer transition-all active:scale-95"
+                            className="w-24 h-16 rounded-2xl overflow-hidden bg-white border border-slate-100 flex items-center justify-center shrink-0 shadow-sm relative group-hover:border-[#A80000]/40 cursor-pointer transition-all active:scale-95"
                         >
                             {firstImage ? (
                                 <img
                                     src={`/${firstImage.file_path}`}
                                     alt={product.description}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
                                 />
                             ) : (
                                 <ImageOff className="w-6 h-6 text-slate-200" />
@@ -194,16 +194,16 @@ const ProductRow = memo(
                         </p>
                     </div>
                 </td>
-                <td className="px-2 py-2 text-[13px] font-bold text-slate-700 text-center uppercase tracking-tighter">
+                <td className="px-2 py-2 text-[13px] font-bold text-slate-700 text-center uppercase tracking-tighter whitespace-nowrap">
                     {product.location_id || <span className="text-slate-300">—</span>}
                 </td>
-                <td className="px-2 py-2 text-[12px] font-mono font-bold text-slate-500 text-center group-hover:text-slate-900 transition-colors">
+                <td className="px-2 py-2 text-[12px] font-mono font-bold text-slate-500 text-center group-hover:text-slate-900 transition-colors whitespace-nowrap">
                     {product.sku || <span className="text-slate-200">—</span>}
                 </td>
-                <td className="px-2 py-2 text-center text-[12px] font-bold text-slate-400 tracking-tighter line-through">
+                <td className="px-2 py-2 text-center text-[12px] font-bold text-slate-400 tracking-tighter line-through whitespace-nowrap">
                     ${product.buy_price || "0.00"}
                 </td>
-                <td className="px-2 py-2 text-center text-[15px] font-black text-slate-900 tracking-tight">
+                <td className="px-2 py-2 text-center text-[15px] font-black text-slate-900 tracking-tight whitespace-nowrap">
                     ${product.list_price || "0.00"}
                 </td>
                 <td className="px-6 py-2">
@@ -221,7 +221,7 @@ const ProductRow = memo(
                             </span>
                             <button
                                 onClick={() => onQuantityChange(product.id, 1)}
-                                className="w-8 h-8 flex items-center justify-center bg-white rounded-lg border border-slate-200 shadow-sm text-slate-400 hover:text-[#FF9F43] transition-all active:scale-90"
+                                className="w-8 h-8 flex items-center justify-center bg-white rounded-lg border border-slate-200 shadow-sm text-slate-400 hover:text-[#A80000] transition-all active:scale-90"
                             >
                                 <Plus className="w-3.5 h-3.5" />
                             </button>
@@ -232,7 +232,7 @@ const ProductRow = memo(
                                 "p-3 rounded-xl text-white shadow-lg transition-all active:scale-90 flex items-center justify-center gap-2",
                                 product.in_cart
                                     ? "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/20"
-                                    : "bg-[#FF9F43] hover:bg-[#e68a30] shadow-[#FF9F43]/20"
+                                    : "bg-[#A80000] hover:bg-[#8B0000] shadow-[#A80000]/20"
                             )}
                         >
                             <ShoppingCart className={cn("w-5 h-5", product.in_cart ? "fill-white" : "fill-none")} />
@@ -272,6 +272,13 @@ export default function Index() {
         );
     }, [filters]);
 
+    const isSearchActive = useMemo(() => {
+        const hasSearchTerm = filters.search && filters.search.trim() !== "";
+        const hasFullFitment = filters.year_from && filters.make && filters.model;
+        
+        return !!(hasSearchTerm || hasFullFitment);
+    }, [filters]);
+
     const debouncedSearch = useMemo(
         () =>
             debounce((value) => {
@@ -293,10 +300,16 @@ export default function Index() {
     const applyFilter = useCallback(
         (key, value) => {
             if (filters[key] === value) return;
+            
+            const nextFilters = { ...filters, [key]: value };
+            const isPrimarySearchSelected = (nextFilters.search && nextFilters.search.trim() !== "") || 
+                                           (nextFilters.year_from && nextFilters.make && nextFilters.model);
+
+        
             setIsLoading(true);
             router.get(
                 route("parts.index"),
-                { ...filters, [key]: value },
+                nextFilters,
                 {
                     preserveState: true,
                     preserveScroll: true,
@@ -436,31 +449,44 @@ export default function Index() {
                     </div>
                 </div>
 
-                {/* Table Section */}
-                <div className="bg-white rounded-[10px] md:rounded-[10px] shadow-2xl shadow-slate-200/50 border border-slate-200/60 overflow-hidden relative">
+                {/* Table Section - Enhanced Mobile Scroll */}
+                <div className="bg-white rounded-[12px] md:rounded-[16px] shadow-xl shadow-slate-200/40 border border-slate-200/60 relative mb-10">
                     {/* Linear Progress Bar */}
                     {isLoading && (
-                        <div className="absolute top-0 left-0 right-0 h-1 bg-[#FF9F43]/10 overflow-hidden z-20">
-                            <div className="h-full bg-[#FF9F43] animate-progress-indeterminate w-1/3 rounded-full shadow-[0_0_8px_rgba(255,159,67,0.5)]" />
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-[#A80000]/10 overflow-hidden z-20 rounded-t-[12px] md:rounded-t-[16px]">
+                            <div className="h-full bg-[#A80000] animate-progress-indeterminate w-1/3 rounded-full shadow-[0_0_8px_rgba(168,0,0,0.5)]" />
                         </div>
                     )}
 
-                    <div className="overflow-x-auto custom-scrollbar">
-                        <table className="w-full text-left border-collapse table-fixed min-w-[1100px]">
-                            <thead>
-                                <tr className="bg-slate-50/50 text-[11px] font-black uppercase tracking-[0.15em] text-slate-500 border-b border-slate-100">
-                                    <th className="px-6 py-5 w-[240px]">Item View</th>
-                                    <th className="px-6 py-5">Product Description</th>
-                                    <th className="px-2 py-5 text-center w-[120px]">Location</th>
-                                    <th className="px-2 py-5 text-center w-[120px]">SKU</th>
-                                    <th className="px-2 py-5 text-center w-[100px]">List</th>
-                                    <th className="px-2 py-5 text-center w-[120px]">Your Price</th>
-                                    <th className="px-6 py-5 w-[180px]"></th>
-                                </tr>
-                            </thead>
-                            <tbody className={cn("divide-y divide-slate-100 transition-all duration-500", isLoading ? "opacity-40 grayscale-[0.3] pointer-events-none" : "opacity-100")}>
-                                {products.length > 0 ? (
-                                    products.map((product) => (
+                    {!isSearchActive ? (
+                        <div className="py-20 md:py-32 px-6 text-center">
+                            <div className="flex flex-col items-center justify-center space-y-4">
+                                <div className="w-16 h-16 md:w-20 md:h-20 bg-rose-50 rounded-full flex items-center justify-center text-[#A80000]">
+                                    <Info className="w-8 h-8 md:w-10 md:h-10" />
+                                </div>
+                                <div className="flex flex-col gap-1 max-w-sm mx-auto">
+                                    <p className="text-slate-900 font-black text-base md:text-lg uppercase tracking-tight">Search for Parts</p>
+                                    <p className="text-slate-400 text-xs md:text-sm font-medium">Please enter a search term or select <strong>Year, Make, and Model</strong> to view products.</p>
+                                </div>
+                            </div>
+                        </div>
+                    ) : products.length > 0 ? (
+                        <div className="w-full -mx-0 overflow-hidden">
+                            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent pb-4 touch-pan-x">
+                                <table className="w-full text-left border-collapse min-w-[1000px]">
+                                    <thead>
+                                        <tr className="bg-slate-50/50 text-[10px] md:text-[11px] font-black uppercase tracking-[0.12em] text-slate-500 border-b border-slate-100 italic">
+                                            <th className="px-5 py-6 w-[220px]">Item View</th>
+                                            <th className="px-5 py-6 min-w-[300px]">Product Description</th>
+                                            <th className="px-2 py-6 text-center w-[120px]">Location</th>
+                                            <th className="px-2 py-6 text-center w-[120px]">SKU</th>
+                                            <th className="px-2 py-6 text-center w-[100px]">List</th>
+                                            <th className="px-2 py-6 text-center w-[120px]">Your Price</th>
+                                            <th className="px-5 py-6 w-[180px]"></th>
+                                        </tr>
+                                    </thead>
+                                <tbody className={cn("divide-y divide-slate-100 transition-all duration-500", isLoading ? "opacity-40 grayscale-[0.3] pointer-events-none" : "opacity-100")}>
+                                    {products.map((product) => (
                                         <ProductRow
                                             key={product.id}
                                             product={product}
@@ -468,7 +494,7 @@ export default function Index() {
                                                 quantities[product.id] || 1
                                             }
                                             styles={getSubCategoryStyles(
-                                                product.sub_category?.name,
+                                                product.subCategory?.name,
                                             )}
                                             onToggleFavorite={
                                                 handleToggleFavorite
@@ -479,28 +505,24 @@ export default function Index() {
                                             onAddToCart={handleAddToCart}
                                             onImageClick={handleOpenModal}
                                         />
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td
-                                            colSpan="7"
-                                            className="py-32 text-center"
-                                        >
-                                            <div className="flex flex-col items-center justify-center space-y-4">
-                                                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
-                                                    <Search className="w-10 h-10" />
-                                                </div>
-                                                <div className="flex flex-col gap-1">
-                                                    <p className="text-slate-900 font-black text-lg">No products found</p>
-                                                    <p className="text-slate-400 text-sm font-medium">Try adjusting your filters or search terms.</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+                ) : (
+                        <div className="py-20 md:py-32 px-6 text-center">
+                            <div className="flex flex-col items-center justify-center space-y-4">
+                                <div className="w-16 h-16 md:w-20 md:h-20 bg-rose-50 rounded-full flex items-center justify-center text-[#A80000]">
+                                    <Search className="w-8 h-8 md:w-10 md:h-10" />
+                                </div>
+                                <div className="flex flex-col gap-1 max-w-sm mx-auto">
+                                    <p className="text-slate-900 font-black text-base md:text-lg uppercase tracking-tight">No products found</p>
+                                    <p className="text-slate-400 text-xs md:text-sm font-medium">Try adjusting your filters or search terms.</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

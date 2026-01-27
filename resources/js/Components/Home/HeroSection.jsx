@@ -2,13 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Play,
-    ChevronRight,
-    Star,
-    Users,
-    Award,
-    Clock,
     Code2,
-    Cpu,
 } from "lucide-react";
 
 export default function HeroSection() {

@@ -14,7 +14,7 @@ class ReturnOrderController extends Controller
     /**
      * Display the list of return requests and eligible orders.
      */
-    public function returnOrder()
+    public function returnOrder(Request $request)
     {
         $returns = ReturnRequest::with(['order.items.product.files'])
             ->where('user_id', Auth::id())
@@ -31,6 +31,7 @@ class ReturnOrderController extends Controller
         return Inertia::render('User/Order/Return', [
             'returns' => $returns,
             'orders' => $orders,
+            'selected_order_id' => $request->query('order_id'),
         ]);
     }
 

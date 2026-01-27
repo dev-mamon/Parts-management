@@ -7,7 +7,6 @@ import {
     Plus, 
     Trash2, 
     ChevronLeft,
-    Monitor,
     Hash,
     Car,
     FileText,

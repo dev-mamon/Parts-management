@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -32,14 +34,31 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
+        $request->validate([
+            'email' => 'required|string',
             'password' => 'required',
         ]);
 
+        $throttleKey = Str::lower($request->input('email')).'|'.$request->ip();
+
+        // Check for too many login attempts
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+
+            return back()->withErrors([
+                'email' => "Too many login attempts. Please try again in {$seconds} seconds.",
+            ]);
+        }
+
+        // Determine if logging in with email or username
+        $loginType = filter_var($request->email, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        $credentials = [$loginType => $request->email, 'password' => $request->password];
+
         if (Auth::attempt($credentials, $request->remember)) {
             $user = Auth::user();
-            // Check if account is verified
+            RateLimiter::clear($throttleKey);
+
+            // Force verify if not yet verified
             if (! $user->is_verified) {
                 Auth::logout();
                 $this->sendOtp($user, self::PURPOSES['verify']);
@@ -47,12 +66,18 @@ class AuthController extends Controller
                 return redirect()->route('otp.verify.show', ['email' => $user->email])
                     ->with('error', 'Please verify your email. A new code has been sent.');
             }
+
             $request->session()->regenerate();
 
-            return redirect()->intended('/dashboard')->with('success', 'Welcome back!');
+            return redirect()->intended('/dashboard')->with('success', 'Logged in successfully!');
         }
 
-        return back()->withErrors(['email' => 'Invalid credentials.']);
+        // Increment attempts on failure
+        RateLimiter::hit($throttleKey);
+
+        return back()->withErrors([
+            'email' => 'These credentials do not match our records.',
+        ]);
     }
 
     // --- 2. Registration ---
@@ -68,26 +93,30 @@ class AuthController extends Controller
             return DB::transaction(function () use ($request) {
                 $data = $request->validated();
 
-                // Check if already exists and verified
+                // Check for verified email to prevent duplicate accounts
                 if (User::where('email', $data['email'])->where('is_verified', true)->exists()) {
-                    return redirect()->route('login')->with('error', 'Email already verified. Please login.');
+                    return redirect()->route('login')->with('info', 'Account already exists. Please login.');
                 }
 
-                $photo = $request->hasFile('profile_photo')
-                    ? $request->file('profile_photo')->store('profile-photos', 'public')
-                    : null;
+                // Handle Profile Photo Upload using Helper
+                $profilePhotoPath = null;
+                if ($request->hasFile('profile_photo')) {
+                    $uploadResult = Helper::uploadFile('users/profile', $request->file('profile_photo'), false);
+                    $profilePhotoPath = $uploadResult['original'] ?? null;
+                }
 
+                // Create or update unverified user
                 $user = User::updateOrCreate(
                     ['email' => $data['email']],
                     array_merge($data, [
                         'password' => Hash::make($data['password']),
-                        'profile_photo' => $photo,
+                        'profile_photo' => $profilePhotoPath,
                         'is_verified' => false,
                         'store_hours' => [
-                            'start_day' => $request->store_start_day,
-                            'end_day' => $request->store_end_day,
-                            'open_time' => $request->store_open_time,
-                            'close_time' => $request->store_close_time,
+                            'start_day' => $data['store_start_day'] ?? null,
+                            'end_day' => $data['store_end_day'] ?? null,
+                            'open_time' => $data['store_open_time'] ?? null,
+                            'close_time' => $data['store_close_time'] ?? null,
                         ],
                     ])
                 );
@@ -95,12 +124,12 @@ class AuthController extends Controller
                 $this->sendOtp($user, self::PURPOSES['verify']);
 
                 return redirect()->route('otp.verify.show', ['email' => $user->email])
-                    ->with('success', 'Check your email for the verification code.');
+                    ->with('success', 'Verification code sent to your email.');
             });
         } catch (\Exception $e) {
-            Log::error("Registration Failed: {$e->getMessage()}");
+            Log::error('Registration Error: '.$e->getMessage(), ['exception' => $e]);
 
-            return back()->withErrors(['message' => 'Registration failed. Try again.'])->withInput();
+            return back()->withErrors(['email' => 'Unable to complete registration. Please try again.'])->withInput();
         }
     }
 

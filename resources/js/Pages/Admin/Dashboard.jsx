@@ -18,7 +18,6 @@ import {
     CartesianGrid,
     Tooltip,
     ResponsiveContainer,
-    Cell,
 } from "recharts";
 
 // Demo Data for Graph

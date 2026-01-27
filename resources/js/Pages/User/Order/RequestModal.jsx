@@ -1,16 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "@inertiajs/react";
 import { X, Upload, ArrowUpRight } from "lucide-react";
 
-export default function ReturnRequestModal({ isOpen, onClose, orders }) {
+export default function ReturnRequestModal({ isOpen, onClose, orders, selectedId }) {
     if (!isOpen) return null;
 
     const { data, setData, post, processing, errors, reset } = useForm({
-        order_id: "",
+        order_id: selectedId || "",
         reason: "",
         description: "",
         image: null,
     });
+
+    useEffect(() => {
+        if (selectedId) {
+            setData("order_id", selectedId);
+        }
+    }, [selectedId]);
 
     const [imagePreview, setImagePreview] = useState(null);
 
@@ -24,7 +30,7 @@ export default function ReturnRequestModal({ isOpen, onClose, orders }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post(route("orders.return.request"), {
+        post(route("user.returns.store"), {
             forceFormData: true,
             onSuccess: () => {
                 reset();
@@ -77,7 +83,7 @@ export default function ReturnRequestModal({ isOpen, onClose, orders }) {
                             </p>
                         )}
                         {orders.length === 0 && (
-                            <p className="text-amber-600 text-[11px] mt-1 font-medium">
+                            <p className="text-[#AD0100] text-[11px] mt-1 font-medium">
                                 No eligible orders found for return.
                             </p>
                         )}
@@ -90,7 +96,7 @@ export default function ReturnRequestModal({ isOpen, onClose, orders }) {
                         <select
                             value={data.reason}
                             onChange={(e) => setData("reason", e.target.value)}
-                            className="w-full border-gray-200 rounded-sm focus:ring-[#FF9F43] focus:border-[#FF9F43] text-sm font-medium"
+                            className="w-full border-gray-200 rounded-sm focus:ring-[#AD0100] focus:border-[#AD0100] text-sm font-medium"
                         >
                             <option value="">Select Reason</option>
                             <option value="Wrong part received">Wrong part received</option>
@@ -116,7 +122,7 @@ export default function ReturnRequestModal({ isOpen, onClose, orders }) {
                                 setData("description", e.target.value)
                             }
                             placeholder="Please provide details about your return..."
-                            className="w-full border-gray-200 rounded-sm focus:ring-[#FF9F43] focus:border-[#FF9F43] text-sm placeholder:text-gray-300"
+                            className="w-full border-gray-200 rounded-sm focus:ring-[#AD0100] focus:border-[#AD0100] text-sm placeholder:text-gray-300"
                         ></textarea>
                         {errors.description && (
                             <p className="text-red-500 text-xs mt-1">
@@ -153,12 +159,12 @@ export default function ReturnRequestModal({ isOpen, onClose, orders }) {
                                 </div>
                             ) : (
                                 <>
-                                    <div className="bg-[#FF9F43]/10 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2">
-                                        <Upload className="w-4 h-4 text-[#FF9F43]" />
+                                    <div className="bg-[#AD0100]/10 w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-2">
+                                        <Upload className="w-4 h-4 text-[#AD0100]" />
                                     </div>
                                     <p className="text-[11px] text-gray-500">
                                         Drop evidence or{" "}
-                                        <span className="text-[#FF9F43] font-bold">
+                                        <span className="text-[#AD0100] font-bold">
                                             browse
                                         </span>
                                     </p>
@@ -178,7 +184,7 @@ export default function ReturnRequestModal({ isOpen, onClose, orders }) {
                         <button
                             type="submit"
                             disabled={processing || orders.length === 0}
-                            className="flex-1 px-6 py-2.5 bg-[#FF9F43] text-white rounded-full font-bold flex items-center justify-center gap-2 hover:bg-[#e68a30] transition-all disabled:opacity-50 text-sm"
+                            className="flex-1 px-6 py-2.5 bg-[#AD0100] text-white rounded-full font-bold flex items-center justify-center gap-2 hover:bg-red-800 transition-all disabled:opacity-50 text-sm"
                         >
                             {processing ? "Submitting..." : "Submit Request"}
                             {!processing && (

@@ -101,33 +101,34 @@ export default function Register() {
             <div className="absolute inset-0 bg-black/60"></div>
             <Head title="Sign up" />
 
-            <div className="relative z-10 w-full max-w-[712px] mx-4 text-white bg-white/10 backdrop-blur-2xl border border-white/20 shadow-2xl rounded-[48px] p-8 md:p-[64px] overflow-hidden">
+            <div className="relative z-10 w-full max-w-[760px] mx-4 text-white bg-white/10 backdrop-blur-2xl border border-white/20 shadow-2xl rounded-[40px] p-8 md:p-12 overflow-hidden">
+                 {/* Decorative Hexagon Patterns */}
                 <img
                     src="/img/10.png"
-                    className="absolute top-[16px] left-[22px] w-[200px] opacity-40 pointer-events-none"
+                    className="absolute top-5 left-5 w-[200px] opacity-20 pointer-events-none"
                     alt=""
                 />
                 <img
                     src="/img/11.png"
-                    className="absolute top-[16px] right-[22px] w-[200px] opacity-40 pointer-events-none"
+                    className="absolute top-5 right-5 w-[200px] opacity-20 pointer-events-none"
                     alt=""
                 />
 
                 <div className="relative w-full">
-                    <div className="text-center mb-10">
+                    <div className="text-center mb-8">
                         <img
                             src="/img/logo.png"
-                            className="h-16 mx-auto mb-6"
+                            className="h-14 mx-auto mb-5"
                             alt="Logo"
                         />
-                        <h2 className="text-4xl font-bold mb-4">Sign up</h2>
-                        <p className="text-lg text-gray-200 max-w-[500px] mx-auto">
+                        <h2 className="text-3xl font-bold mb-3">Sign up</h2>
+                        <p className="text-base text-gray-200 max-w-[500px] mx-auto opacity-90">
                             Sign up to access your personalized B2B car parts
                             marketplace.
                         </p>
                     </div>
 
-                    <form onSubmit={submit} className="space-y-10">
+                    <form onSubmit={submit} className="space-y-8">
                         {/* Personal Information */}
                         <div className="space-y-6">
                             <h3 className="text-xl font-bold border-b border-white/10 pb-2 text-left">
@@ -204,7 +205,7 @@ export default function Register() {
                                         onClick={() =>
                                             setShowPassword(!showPassword)
                                         }
-                                        className="absolute right-4 top-[48px] text-gray-400 hover:text-white"
+                                        className="absolute right-4 top-[44px] text-gray-400 hover:text-white transition-colors"
                                     >
                                         {showPassword ? (
                                             <LucideEye size={18} />
@@ -321,7 +322,7 @@ export default function Register() {
                                     Account type
                                 </label>
                                 <select
-                                    className="w-full bg-black/40 border border-white/20 text-gray-300 rounded-[12px] h-[64px] px-5 outline-none focus:ring-2 focus:ring-red-600 appearance-none"
+                                    className="w-full bg-black/40 border border-white/20 text-gray-300 rounded-[12px] h-[56px] px-5 outline-none focus:ring-2 focus:ring-red-600 appearance-none transition-all"
                                     value={data.account_type}
                                     onChange={(e) =>
                                         handleChange(
@@ -431,16 +432,16 @@ export default function Register() {
                         </div>
 
                         {/* Submit */}
-                        <div className="flex flex-col items-center pt-8">
+                        <div className="flex flex-col items-center pt-6">
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="group w-[240px] h-[64px] bg-[#AD0100] hover:bg-red-700 text-white rounded-[100px] flex items-center justify-center transition-all shadow-xl border-none disabled:opacity-70 disabled:cursor-not-allowed"
+                                className="group w-full max-w-[240px] h-[56px] bg-[#AD0100] hover:bg-red-700 text-white rounded-full flex items-center justify-center transition-all shadow-xl border-none disabled:opacity-70 disabled:cursor-not-allowed active:scale-[0.98]"
                             >
                                 {processing ? (
                                     <div className="flex items-center">
                                         <svg
-                                            className="animate-spin h-6 w-6 text-white mr-3"
+                                            className="animate-spin h-5 w-5 text-white mr-3"
                                             xmlns="http://www.w3.org/2000/svg"
                                             fill="none"
                                             viewBox="0 0 24 24"
@@ -459,26 +460,26 @@ export default function Register() {
                                                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                             ></path>
                                         </svg>
-                                        <span className="text-[20px] font-bold">
+                                        <span className="text-lg font-bold">
                                             Registering...
                                         </span>
                                     </div>
                                 ) : (
                                     <>
-                                        <span className="text-[22px] font-bold mr-3">
+                                        <span className="text-xl font-bold mr-3">
                                             Sign up
                                         </span>
-                                        <div className="bg-white/20 rounded-full p-3 group-hover:bg-white/30 transition-colors">
-                                            <LucideMoveRight size={24} />
+                                        <div className="bg-white/20 rounded-full p-2.5 group-hover:bg-white/30 transition-colors">
+                                            <LucideMoveRight size={20} />
                                         </div>
                                     </>
                                 )}
                             </button>
-                            <p className="mt-10 text-gray-200">
+                            <p className="mt-8 text-gray-300">
                                 Already have an account?{" "}
                                 <Link
                                     href={route("login")}
-                                    className="text-black font-bold hover:underline"
+                                    className="text-white font-bold hover:underline"
                                 >
                                     Login
                                 </Link>
@@ -512,7 +513,7 @@ const CustomSelect = ({ value, options, onChange }) => (
 );
 
 const ToggleSwitch = ({ label, active, onClick }) => (
-    <div className="flex items-center justify-between bg-black/40 border border-white/10 p-4 rounded-[12px] h-[64px]">
+    <div className="flex items-center justify-between bg-black/40 border border-white/10 p-4 rounded-[12px] h-[56px]">
         <span className="text-gray-200 text-[16px]">{label}</span>
         <button
             type="button"

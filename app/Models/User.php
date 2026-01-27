@@ -38,15 +38,15 @@ class User extends Authenticatable
         return trim($this->user_type) === 'admin';
     }
 
-    // generate username from first name and last name an  id
+    // Generate unique short username from first name and id
     protected static function booted()
     {
         static::created(function ($user) {
             $firstName = strtolower(str_replace(' ', '', $user->first_name));
-            $lastName = strtolower(str_replace(' ', '', $user->last_name));
             $id = str_pad($user->id, 3, '0', STR_PAD_LEFT);
 
-            $user->username = "{$firstName}.{$lastName}.{$id}";
+            // Shorter format: name + 001 (e.g., john123)
+            $user->username = "{$firstName}{$id}";
             $user->save();
         });
     }

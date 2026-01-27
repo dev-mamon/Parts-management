@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import UserLayout from "@/Layouts/UserLayout";
-import { Head, usePage, Link } from "@inertiajs/react";
+import { Head, usePage, Link, router } from "@inertiajs/react";
 import { Skeleton } from "@/Components/ui/Skeleton";
 import {
     ShoppingCart,
@@ -9,36 +9,142 @@ import {
     ImageOff,
     HeartOff,
     ArrowLeft,
+    Trash2,
 } from "lucide-react";
-import ConfirmDelete from "@/Components/ui/ConfirmDelete";
+import Swal from "sweetalert2";
 
-// --- Skeleton Card Component (Single Item) ---
-const ProductCardSkeleton = () => (
-    <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden flex flex-col p-4">
-        {/* Image Skeleton */}
-        <Skeleton className="h-56 w-full rounded-2xl mb-4" />
+const cn = (...classes) => classes.filter(Boolean).join(" ");
 
-        {/* SKU & Brand Skeleton */}
-        <div className="flex-grow space-y-3 mb-4">
-            <Skeleton className="h-6 w-3/4 rounded-lg" />
-            <Skeleton className="h-4 w-1/2 rounded-md" />
-        </div>
+/**
+ * Optimized Favorite Card Component
+ */
+const FavoriteCard = memo(({ fav, quantity, onQuantityChange, onAddToCart, onDelete }) => {
+    const product = fav.product;
+    const firstImage = product.files?.[0];
 
-        {/* Price & Actions Skeleton */}
-        <div className="pt-4 border-t border-gray-50 flex items-center justify-between gap-2">
-            <div className="flex gap-4">
-                <div className="space-y-2">
-                    <Skeleton className="h-3 w-8" />
-                    <Skeleton className="h-5 w-12" />
+    return (
+        <div className="bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full hover:shadow-lg transition-all duration-300 group">
+            {/* Image Container - Reduced Height */}
+            <div className="relative h-[180px] w-full overflow-hidden bg-slate-50/50">
+                <div className="absolute top-2.5 left-2.5 z-10">
+                    <div className="bg-white/90 backdrop-blur-sm shadow-sm text-slate-900 text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider border border-slate-100">
+                        {product.subCategory?.name || "Premium Part"}
+                    </div>
                 </div>
-                <div className="space-y-2">
-                    <Skeleton className="h-3 w-12" />
-                    <Skeleton className="h-6 w-16" />
+                
+                <button 
+                    onClick={() => onDelete(fav.id)}
+                    className="absolute top-2.5 right-2.5 z-10 w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md text-red-500 hover:bg-red-50 hover:text-[#AD0100] transition-all active:scale-90 border border-slate-100"
+                >
+                    <Trash2 size={16} strokeWidth={2.5} />
+                </button>
+
+                <div className="w-full h-full flex items-center justify-center p-4">
+                    {firstImage ? (
+                        <img
+                            src={`/${firstImage.file_path}`}
+                            alt={product.description}
+                            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700"
+                        />
+                    ) : (
+                        <div className="flex flex-col items-center gap-2 text-slate-200">
+                            <ImageOff size={32} strokeWidth={1.5} />
+                            <span className="text-[9px] font-black uppercase tracking-widest opacity-50">No Preview</span>
+                        </div>
+                    )}
                 </div>
             </div>
-            <div className="flex items-center gap-2">
-                <Skeleton className="h-10 w-24 rounded-lg" />
-                <Skeleton className="h-10 w-10 rounded-xl" />
+
+            {/* Content Container - Compact Padding */}
+            <div className="p-4 flex-1 flex flex-col">
+                <div className="mb-3">
+                    <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] font-black text-[#AD0100] uppercase tracking-tighter bg-red-50 px-2 py-0.5 rounded">SKU</span>
+                        <h3 className="text-sm font-black text-slate-900 tracking-tight line-clamp-1">
+                            {product.sku || "N/A"}
+                        </h3>
+                    </div>
+                    <p className="text-[11px] font-bold text-slate-500 tracking-tight mb-2 line-clamp-1">
+                        {product.fitments?.[0]
+                            ? `${product.fitments[0].year_from}-${product.fitments[0].year_to} ${product.fitments[0].make} ${product.fitments[0].model}`
+                            : "General Fitment"}
+                    </p>
+                    <p className="text-slate-400 text-[12px] leading-tight line-clamp-2 font-medium">
+                        {product.description}
+                    </p>
+                </div>
+
+                {/* Footer Section - High Density */}
+                <div className="mt-auto pt-3 border-t border-slate-50 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-4">
+                        <div className="flex flex-col">
+                            <span className="text-[9px] font-black text-slate-300 uppercase tracking-tighter leading-none mb-0.5">MSRP</span>
+                            <span className="text-[12px] font-bold text-slate-300 line-through tracking-tight leading-none">
+                                ${product.list_price || "0.00"}
+                            </span>
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-[9px] font-black text-[#AD0100] uppercase tracking-tighter leading-none mb-0.5">Dealer</span>
+                            <span className="text-[16px] font-black text-[#AD0100] tracking-tighter leading-none">
+                                ${product.list_price || "0.00"}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 pt-1">
+                        <div className="flex items-center bg-white border border-slate-200 rounded-lg h-8 overflow-hidden shadow-sm">
+                            <button
+                                onClick={() => onQuantityChange(product.id, -1)}
+                                className="w-7 h-full flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-colors border-r border-slate-100"
+                                disabled={quantity <= 1}
+                            >
+                                <Minus size={12} />
+                            </button>
+                            <span className="w-7 text-center text-[11px] font-black text-slate-800">
+                                {quantity}
+                            </span>
+                            <button
+                                onClick={() => onQuantityChange(product.id, 1)}
+                                className="w-7 h-full flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-colors border-l border-slate-100"
+                            >
+                                <Plus size={12} />
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={() => onAddToCart(product.id, quantity)}
+                            className="w-8 h-8 bg-[#AD0100] hover:bg-red-800 text-white rounded-lg flex items-center justify-center shadow-md shadow-red-100 transition-all active:scale-95 group/btn"
+                        >
+                            <Plus size={16} className="transition-transform group-hover/btn:rotate-90" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+});
+
+/**
+ * Detailed Skeleton Card to match the new design
+ */
+const SkeletonCard = () => (
+    <div className="bg-white rounded-md shadow-sm border border-slate-100 overflow-hidden flex flex-col h-[380px] p-0 animate-pulse">
+        <div className="h-[180px] bg-slate-100 w-full" />
+        <div className="p-4 flex-1 flex flex-col gap-3">
+            <div className="space-y-2">
+                <div className="h-4 bg-slate-100 rounded w-3/4" />
+                <div className="h-3 bg-slate-50 rounded w-1/2" />
+            </div>
+            <div className="space-y-2 mt-1">
+                <div className="h-2 bg-slate-50 rounded-full w-full" />
+                <div className="h-2 bg-slate-50 rounded-full w-2/3" />
+            </div>
+            <div className="mt-auto pt-3 border-t border-slate-50 flex items-center justify-between">
+                <div className="flex gap-3">
+                    <div className="h-8 bg-slate-50 rounded w-12" />
+                    <div className="h-8 bg-slate-100 rounded w-16" />
+                </div>
+                <div className="h-8 w-16 bg-slate-50 rounded-lg" />
             </div>
         </div>
     </div>
@@ -46,170 +152,106 @@ const ProductCardSkeleton = () => (
 
 export default function Index() {
     const { auth, favourites } = usePage().props;
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(favourites.data?.length > 0);
+    const [quantities, setQuantities] = useState({});
 
-    // Initial Loading Animation
     useEffect(() => {
-        const timer = setTimeout(() => setIsLoading(false), 800);
-        return () => clearTimeout(timer);
+        if (favourites.data?.length === 0) {
+            setIsLoading(false);
+        } else {
+            const timer = setTimeout(() => setIsLoading(false), 800);
+            return () => clearTimeout(timer);
+        }
+    }, [favourites.data?.length]);
+
+    const handleQuantityChange = useCallback((id, delta) => {
+        setQuantities(prev => ({
+            ...prev,
+            [id]: Math.max(1, (prev[id] || 1) + delta)
+        }));
     }, []);
 
-    // Local state for quantities
-    const [quantities, setQuantities] = useState(
-        Object.fromEntries(favourites.data.map((fav) => [fav.product.id, 1]))
-    );
+    const handleAddToCart = (productId, qty) => {
+        router.post(route("parts.to-cart"), {
+            product_id: productId,
+            quantity: qty
+        }, { preserveScroll: true });
+    };
 
-    const updateQuantity = (id, delta) => {
-        setQuantities((prev) => ({
-            ...prev,
-            [id]: Math.max(1, (prev[id] || 1) + delta),
-        }));
+    const handleDelete = (favId) => {
+        Swal.fire({
+            title: "Remove from Favorites?",
+            text: "This item will be removed from your saved list.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#EF4444",
+            cancelButtonColor: "#64748B",
+            confirmButtonText: "Yes, remove it!",
+            customClass: {
+                popup: "rounded-2xl",
+                confirmButton: "rounded-full px-6 py-2 font-bold",
+                cancelButton: "rounded-full px-6 py-2 font-bold",
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(route("favourites.destroy", favId), {
+                    preserveScroll: true,
+                });
+            }
+        });
     };
 
     return (
         <UserLayout user={auth.user}>
-            <Head title="My Favourites" />
+            <Head title="My Favorites" />
             <div className="p-6 bg-[#F8F9FB] min-h-screen">
-                {/* Check if there is data OR if it's loading */}
+                <div className="mb-8">
+                    <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">
+                        My Favorites
+                    </h1>
+                    <p className="text-slate-500 font-medium tracking-tight">Manage your saved parts and add them to cart easily.</p>
+                </div>
+
                 {!isLoading && favourites.data.length === 0 ? (
-                    /* EMPTY STATE */
-                    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-                        <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-sm mb-6 border border-gray-100">
-                            <HeartOff className="w-12 h-12 text-slate-300" />
+                    <div className="flex flex-col items-center justify-center min-h-[50vh] text-center bg-white rounded-md border border-slate-100 p-10 shadow-sm">
+                        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-6">
+                            <HeartOff className="w-10 h-10 text-[#AD0100] opacity-50" />
                         </div>
-                        <h2 className="text-2xl font-black text-slate-900 mb-2">
-                            Your favorites list is empty
+                        <h2 className="text-xl font-black text-slate-900 mb-2">
+                            Favorites List Empty
                         </h2>
-                        <p className="text-slate-500 max-w-sm mb-8">
-                            Looks like you haven't added any parts to your
-                            favorites yet.
+                        <p className="text-slate-500 text-sm max-w-xs mb-8 font-medium">
+                            Explore our premium parts inventory and save your favorites here.
                         </p>
                         <Link
                             href={route("parts.index")}
-                            className="inline-flex items-center gap-2 bg-orange-500 text-white px-8 py-4 rounded-full font-bold shadow-lg transition-all active:scale-95"
+                            className="inline-flex items-center gap-2 bg-[#AD0100] text-white px-8 py-3 rounded-full font-black text-xs uppercase tracking-widest shadow-lg shadow-red-100 transition-all active:scale-95"
                         >
-                            <ArrowLeft className="w-5 h-5" />
-                            Continue Shopping
+                            <ArrowLeft className="w-4 h-4" />
+                            Return to Shopping
                         </Link>
                     </div>
                 ) : (
-                    /* GRID SECTION (Loading or Data) */
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {isLoading
-                            ? /* SKELETON LOOP */
-                              /* favourites.data.length thakle toto goli dekhabe, na thakle default 4 ti */
-                              (favourites.data.length > 0
-                                  ? favourites.data
-                                  : Array(4).fill(0)
-                              ).map((_, i) => <ProductCardSkeleton key={i} />)
-                            : /* REAL DATA LOOP */
-                              favourites.data.map((fav) => {
-                                  const product = fav.product;
-                                  const firstImage = product.files?.[0];
-
-                                  return (
-                                      <div
-                                          key={fav.id}
-                                          className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden flex flex-col p-4 hover:shadow-md transition-all duration-300"
-                                      >
-                                          {/* Image Container */}
-                                          <div className="relative rounded-2xl overflow-hidden h-56 bg-gray-100 mb-4">
-                                              <div className="absolute top-3 right-3 z-20">
-                                                  <ConfirmDelete
-                                                      id={fav.id}
-                                                      routeName="favourites.destroy"
-                                                  />
-                                              </div>
-                                              {firstImage ? (
-                                                  <img
-                                                      src={`/${firstImage.file_path}`}
-                                                      className="w-full h-full object-cover"
-                                                      alt={product.title}
-                                                  />
-                                              ) : (
-                                                  <div className="w-full h-full flex items-center justify-center">
-                                                      <ImageOff className="w-12 h-12 text-gray-300" />
-                                                  </div>
-                                              )}
-                                          </div>
-
-                                          {/* Content Info */}
-                                          <div className="flex-grow space-y-1 mb-4">
-                                              <h3 className="text-lg font-bold text-slate-900 leading-tight">
-                                                  {product.sku || "Product SKU"}
-                                              </h3>
-                                              <p className="text-slate-500 text-xs font-bold uppercase">
-                                                  {product.fitments?.[0]
-                                                      ?.make || "Parts Maker"}
-                                              </p>
-                                          </div>
-
-                                          {/* Footer: Price & Cart Actions */}
-                                          <div className="pt-4 border-t border-gray-50 flex items-center justify-between gap-2">
-                                              <div className="flex gap-4">
-                                                  <div>
-                                                      <span className="block text-[10px] text-slate-400 uppercase font-bold">
-                                                          List
-                                                      </span>
-                                                      <span className="text-sm font-semibold text-slate-400 line-through">
-                                                          $
-                                                          {product.list_price ||
-                                                              "0.00"}
-                                                      </span>
-                                                  </div>
-                                                  <div>
-                                                      <span className="block text-[10px] text-slate-400 uppercase font-bold">
-                                                          Your Price
-                                                      </span>
-                                                      <span className="text-xl font-black text-red-700">
-                                                          $
-                                                          {product.buy_price ||
-                                                              "0.00"}
-                                                      </span>
-                                                  </div>
-                                              </div>
-
-                                              <div className="flex items-center gap-2">
-                                                  <div className="flex items-center border border-gray-200 rounded-lg h-10 bg-white overflow-hidden shadow-sm">
-                                                      <button
-                                                          onClick={() =>
-                                                              updateQuantity(
-                                                                  product.id,
-                                                                  -1
-                                                              )
-                                                          }
-                                                          className="px-2 h-full hover:bg-gray-50 transition-colors"
-                                                      >
-                                                          <Minus className="w-4 h-4 text-gray-400" />
-                                                      </button>
-                                                      <div className="w-8 text-center font-bold text-sm border-x border-gray-50">
-                                                          {quantities[
-                                                              product.id
-                                                          ] || 1}
-                                                      </div>
-                                                      <button
-                                                          onClick={() =>
-                                                              updateQuantity(
-                                                                  product.id,
-                                                                  1
-                                                              )
-                                                          }
-                                                          className="px-2 h-full hover:bg-gray-50 transition-colors"
-                                                      >
-                                                          <Plus className="w-4 h-4 text-gray-400" />
-                                                      </button>
-                                                  </div>
-                                                  <button className="bg-[#F1B229] hover:bg-[#D9A024] text-white p-2.5 rounded-xl shadow-md transition-all active:scale-95">
-                                                      <ShoppingCart className="w-5 h-5" />
-                                                  </button>
-                                              </div>
-                                          </div>
-                                      </div>
-                                  );
-                              })}
+                            ? (favourites.data?.length > 0 ? favourites.data : Array(8).fill(0)).map((_, i) => (
+                                <SkeletonCard key={i} />
+                              ))
+                            : favourites.data.map((fav) => (
+                                <FavoriteCard 
+                                    key={fav.id} 
+                                    fav={fav} 
+                                    quantity={quantities[fav.product.id] || 1}
+                                    onQuantityChange={handleQuantityChange}
+                                    onAddToCart={handleAddToCart}
+                                    onDelete={handleDelete}
+                                />
+                              ))
+                        }
                     </div>
                 )}
             </div>
         </UserLayout>
     );
 }
+

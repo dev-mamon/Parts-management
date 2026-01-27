@@ -21,4 +21,17 @@ class ActiveOrderController extends Controller
             'orders' => $activeOrders,
         ]);
     }
+
+    public function show(Order $order)
+    {
+        if ($order->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $order->load(['items.product.files', 'payment']);
+
+        return Inertia::render('User/Order/Show', [
+            'order' => $order,
+        ]);
+    }
 }

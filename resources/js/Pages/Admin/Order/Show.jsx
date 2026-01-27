@@ -15,10 +15,7 @@ import {
     Truck,
     XCircle,
     CreditCard,
-    ChevronRight,
-    ExternalLink,
-    Info,
-    ArrowLeft
+    Info
 } from "lucide-react";
 
 export default function Show({ order }) {

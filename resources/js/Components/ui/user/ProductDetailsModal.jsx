@@ -84,7 +84,7 @@ export default function ProductDetailsModal({ product, isOpen, onClose, onToggle
                                         <img 
                                             src={`/${file.file_path}`} 
                                             alt={product.description} 
-                                            className="w-full h-full object-cover" 
+                                            className="w-full h-full object-contain" 
                                         />
                                     </button>
                                 ))}
@@ -96,7 +96,7 @@ export default function ProductDetailsModal({ product, isOpen, onClose, onToggle
                                     <img 
                                         src={`/${selectedImage}`} 
                                         alt={product.description} 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700" 
                                     />
                                 ) : (
                                     <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-2">

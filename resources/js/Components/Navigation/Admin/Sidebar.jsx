@@ -16,6 +16,7 @@ import {
     Mail,
     CreditCard,
     Headset,
+    Image as ImageIcon,
     X,
 } from "lucide-react";
 
@@ -132,6 +133,11 @@ const Sidebar = ({ isCollapsed, isMobileOpen, setIsMobileOpen }) => {
             label: "Support Tickets",
             path: "/admin/support",
             icon: <Headset size={18} />,
+        },
+        {
+            label: "Announcements",
+            path: "/admin/announcements",
+            icon: <ImageIcon size={18} />,
         },
         {
             label: "Settings",

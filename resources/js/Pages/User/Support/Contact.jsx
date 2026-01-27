@@ -1,16 +1,17 @@
 import React from "react";
 import UserLayout from "@/Layouts/UserLayout";
-import { Head, useForm } from "@inertiajs/react";
+import { Head, useForm, usePage } from "@inertiajs/react";
 import { 
     Phone, 
     Mail, 
     MapPin, 
     MessageCircle,
     Send,
-    ChevronDown
+    ArrowRight
 } from "lucide-react";
 
 export default function Contact() {
+    const { auth } = usePage().props;
     const { data, setData, post, processing, errors, reset } = useForm({
         first_name: "",
         last_name: "",
@@ -29,159 +30,176 @@ export default function Contact() {
     };
 
     return (
-        <UserLayout>
-            <Head title="Contact Us" />
+        <UserLayout user={auth.user}>
+            <Head title="Contact Support" />
 
-            <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-12 font-sans">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {/* Header */}
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Customer Support</h1>
+                    <p className="text-slate-500 text-sm mt-0.5">We're here to help. Send us a message and we'll respond as soon as possible.</p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     
-                    {/* Left Column: Contact info */}
-                    <div className="lg:col-span-4 space-y-6">
-                        <div className="bg-white p-8 rounded-xl border border-gray-100 shadow-sm transition-all hover:shadow-md">
-                            <h2 className="text-xl font-bold text-gray-900 mb-8">Contact Information</h2>
+                    {/* Left Column: Essential Info */}
+                    <div className="lg:col-span-4 space-y-4">
+                        <div className="bg-white p-5 rounded-lg border border-slate-200 shadow-sm">
+                            <h2 className="text-xs font-bold text-slate-400 tracking-wider uppercase mb-5">Contact Details</h2>
                             
-                            <div className="space-y-8">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 shrink-0">
-                                        <Phone size={22} />
+                            <div className="space-y-5">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center text-[#AD0100] shrink-0 border border-red-100">
+                                        <Phone size={18} />
                                     </div>
-                                    <div className="pt-1">
-                                        <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest mb-1">Phone</p>
-                                        <p className="text-[15px] font-bold text-gray-800 tracking-tight">(1-800-288-6727)</p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 shrink-0">
-                                        <Mail size={22} />
-                                    </div>
-                                    <div className="pt-1">
-                                        <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest mb-1">Email</p>
-                                        <p className="text-[15px] font-bold text-gray-800 tracking-tight">support@autopartshub.com</p>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-slate-400 leading-none mb-1">Direct Line</p>
+                                        <p className="text-sm font-semibold text-slate-900">(1-800-288-6727)</p>
                                     </div>
                                 </div>
 
-                                <div className="flex items-start gap-4">
-                                    <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 shrink-0">
-                                        <MapPin size={22} />
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center text-slate-600 shrink-0 border border-slate-100">
+                                        <Mail size={18} />
                                     </div>
-                                    <div className="pt-1">
-                                        <p className="text-[12px] font-bold text-gray-400 uppercase tracking-widest mb-1">Address</p>
-                                        <p className="text-[15px] font-bold text-gray-800 tracking-tight leading-snug">
+                                    <div>
+                                        <p className="text-[10px] font-bold text-slate-400 leading-none mb-1">Support Email</p>
+                                        <p className="text-sm font-semibold text-slate-900">support@autopartshub.com</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center text-slate-600 shrink-0 border border-slate-100">
+                                        <MapPin size={18} />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-bold text-slate-400 leading-none mb-1">Headquarters</p>
+                                        <p className="text-sm font-semibold text-slate-900 leading-snug">
                                             123 Industrial Parkway Suite 500
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        {/* Minimal Help Box */}
+                        <div className="bg-slate-900 p-5 rounded-lg text-white shadow-sm group">
+                            <h3 className="font-bold text-sm mb-1.5 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-[#AD0100] rounded-full" />
+                                Instant Answers
+                            </h3>
+                            <p className="text-slate-400 text-xs mb-4 leading-relaxed">Most return and order questions are already answered in our FAQ.</p>
+                            <button className="w-full flex items-center justify-center gap-2 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white py-2.5 rounded transition-colors border border-slate-700">
+                                Browse FAQ <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Right Column: Form */}
+                    {/* Right Column: High-Density Minimal Form */}
                     <div className="lg:col-span-8">
-                        <div className="bg-white p-6 md:p-10 rounded-xl border border-gray-100 shadow-sm">
-                            <div className="flex items-center gap-3 mb-10">
-                                <div className="w-10 h-10 bg-yellow-50 rounded-full flex items-center justify-center text-yellow-600">
-                                    <MessageCircle size={20} />
-                                </div>
-                                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Send us a Message</h1>
+                        <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+                            <div className="flex items-center gap-2.5 mb-6">
+                                <MessageCircle size={18} className="text-[#AD0100]" />
+                                <h2 className="text-lg font-bold text-slate-900 tracking-tight">Direct Inquiry</h2>
                             </div>
 
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[14px] font-bold text-gray-700 ml-1">First Name</label>
-                                        <input 
-                                            type="text"
-                                            placeholder="Jane"
-                                            value={data.first_name}
-                                            onChange={e => setData("first_name", e.target.value)}
-                                            className={`w-full h-12 bg-gray-50 border ${errors.first_name ? 'border-rose-400' : 'border-gray-100'} rounded-xl px-4 text-[15px] focus:bg-white focus:ring-2 focus:ring-[#FF9F43]/10 focus:border-[#FF9F43] transition-all outline-none`}
-                                        />
-                                        {errors.first_name && <p className="text-rose-500 text-[12px] mt-1 ml-1">{errors.first_name}</p>}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[14px] font-bold text-gray-700 ml-1">Last Name</label>
-                                        <input 
-                                            type="text"
-                                            placeholder="Morgan"
-                                            value={data.last_name}
-                                            onChange={e => setData("last_name", e.target.value)}
-                                            className={`w-full h-12 bg-gray-50 border ${errors.last_name ? 'border-rose-400' : 'border-gray-100'} rounded-xl px-4 text-[15px] focus:bg-white focus:ring-2 focus:ring-[#FF9F43]/10 focus:border-[#FF9F43] transition-all outline-none`}
-                                        />
-                                        {errors.last_name && <p className="text-rose-500 text-[12px] mt-1 ml-1">{errors.last_name}</p>}
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-[14px] font-bold text-gray-700 ml-1">Email</label>
-                                        <input 
-                                            type="email"
-                                            placeholder="Janemorgan@gmail.com"
-                                            value={data.email}
-                                            onChange={e => setData("email", e.target.value)}
-                                            className={`w-full h-12 bg-gray-50 border ${errors.email ? 'border-rose-400' : 'border-gray-100'} rounded-xl px-4 text-[15px] focus:bg-white focus:ring-2 focus:ring-[#FF9F43]/10 focus:border-[#FF9F43] transition-all outline-none`}
-                                        />
-                                        {errors.email && <p className="text-rose-500 text-[12px] mt-1 ml-1">{errors.email}</p>}
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[14px] font-bold text-gray-700 ml-1">Phone Number</label>
-                                        <input 
-                                            type="text"
-                                            placeholder="+880 01521 436 585"
-                                            value={data.phone}
-                                            onChange={e => setData("phone", e.target.value)}
-                                            className={`w-full h-12 bg-gray-50 border ${errors.phone ? 'border-rose-400' : 'border-gray-100'} rounded-xl px-4 text-[15px] focus:bg-white focus:ring-2 focus:ring-[#FF9F43]/10 focus:border-[#FF9F43] transition-all outline-none`}
-                                        />
-                                        {errors.phone && <p className="text-rose-500 text-[12px] mt-1 ml-1">{errors.phone}</p>}
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-[14px] font-bold text-gray-700 ml-1">Order ID (Optional)</label>
+                            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-slate-700 ml-0.5">First Name</label>
                                     <input 
                                         type="text"
-                                        placeholder="ORD-XXXX"
+                                        placeholder="Jane"
+                                        value={data.first_name}
+                                        onChange={e => setData("first_name", e.target.value)}
+                                        className={`w-full h-10 bg-slate-50 border ${errors.first_name ? 'border-red-400' : 'border-slate-200'} rounded-md px-3 text-sm focus:bg-white focus:ring-1 focus:ring-red-100 focus:border-[#AD0100] transition-all outline-none`}
+                                    />
+                                    {errors.first_name && <p className="text-red-500 text-[10px] mt-1">{errors.first_name}</p>}
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-slate-700 ml-0.5">Last Name</label>
+                                    <input 
+                                        type="text"
+                                        placeholder="Morgan"
+                                        value={data.last_name}
+                                        onChange={e => setData("last_name", e.target.value)}
+                                        className={`w-full h-10 bg-slate-50 border ${errors.last_name ? 'border-red-400' : 'border-slate-200'} rounded-md px-3 text-sm focus:bg-white focus:ring-1 focus:ring-red-100 focus:border-[#AD0100] transition-all outline-none`}
+                                    />
+                                    {errors.last_name && <p className="text-red-500 text-[10px] mt-1">{errors.last_name}</p>}
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-slate-700 ml-0.5">Email Address</label>
+                                    <input 
+                                        type="email"
+                                        placeholder="jane.m@example.com"
+                                        value={data.email}
+                                        onChange={e => setData("email", e.target.value)}
+                                        className={`w-full h-10 bg-slate-50 border ${errors.email ? 'border-red-400' : 'border-slate-200'} rounded-md px-3 text-sm focus:bg-white focus:ring-1 focus:ring-red-100 focus:border-[#AD0100] transition-all outline-none`}
+                                    />
+                                    {errors.email && <p className="text-red-500 text-[10px] mt-1">{errors.email}</p>}
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-slate-700 ml-0.5">Phone Number</label>
+                                    <input 
+                                        type="text"
+                                        placeholder="+1 (555) 000-0000"
+                                        value={data.phone}
+                                        onChange={e => setData("phone", e.target.value)}
+                                        className={`w-full h-10 bg-slate-50 border ${errors.phone ? 'border-red-400' : 'border-slate-200'} rounded-md px-3 text-sm focus:bg-white focus:ring-1 focus:ring-red-100 focus:border-[#AD0100] transition-all outline-none`}
+                                    />
+                                    {errors.phone && <p className="text-red-500 text-[10px] mt-1">{errors.phone}</p>}
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-slate-700 ml-0.5">Order ID <span className="text-slate-400 font-normal ml-1">(Optional)</span></label>
+                                    <input 
+                                        type="text"
+                                        placeholder="ORD-XXXXXX"
                                         value={data.order_id}
                                         onChange={e => setData("order_id", e.target.value)}
-                                        className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 text-[15px] focus:bg-white focus:ring-2 focus:ring-[#FF9F43]/10 focus:border-[#FF9F43] transition-all outline-none"
+                                        className="w-full h-10 bg-slate-50 border border-slate-200 rounded-md px-3 text-sm focus:bg-white focus:ring-1 focus:ring-red-50 focus:border-[#AD0100] transition-all outline-none"
                                     />
                                 </div>
 
-                                <div className="space-y-2 relative">
-                                    <label className="text-[14px] font-bold text-gray-700 ml-1">Subject</label>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-slate-700 ml-0.5">Inquiry Subject</label>
                                     <select 
                                         value={data.subject}
                                         onChange={e => setData("subject", e.target.value)}
-                                        className={`w-full h-12 bg-gray-50 border ${errors.subject ? 'border-rose-400' : 'border-gray-100'} rounded-xl px-4 text-[15px] appearance-none focus:bg-white focus:ring-2 focus:ring-[#FF9F43]/10 focus:border-[#FF9F43] transition-all outline-none`}
+                                        className={`w-full h-10 bg-slate-50 border ${errors.subject ? 'border-red-400' : 'border-slate-200'} rounded-md px-3 text-sm focus:bg-white focus:ring-1 focus:ring-red-100 focus:border-[#AD0100] transition-all outline-none cursor-pointer`}
                                     >
-                                        <option value="">Select a subject</option>
+                                        <option value="">Select subject</option>
                                         <option value="General Inquiry">General Inquiry</option>
                                         <option value="Order Support">Order Support</option>
                                         <option value="Return Request">Return Request</option>
                                         <option value="Technical Issue">Technical Issue</option>
                                         <option value="Others">Others</option>
                                     </select>
-                                    {errors.subject && <p className="text-rose-500 text-[12px] mt-1 ml-1">{errors.subject}</p>}
+                                    {errors.subject && <p className="text-red-500 text-[10px] mt-1">{errors.subject}</p>}
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[14px] font-bold text-gray-700 ml-1">Message</label>
+                                <div className="md:col-span-2 space-y-1">
+                                    <label className="text-xs font-semibold text-slate-700 ml-0.5">Message</label>
                                     <textarea 
-                                        rows="6"
-                                        placeholder="Please describe your inquiry in detail..."
+                                        rows="4"
+                                        placeholder="Describe your inquiry in detail..."
                                         value={data.message}
                                         onChange={e => setData("message", e.target.value)}
-                                        className={`w-full bg-gray-50 border ${errors.message ? 'border-rose-400' : 'border-gray-100'} rounded-2xl p-4 text-[15px] focus:bg-white focus:ring-2 focus:ring-[#FF9F43]/10 focus:border-[#FF9F43] transition-all outline-none resize-none`}
+                                        className={`w-full bg-slate-50 border ${errors.message ? 'border-red-400' : 'border-slate-200'} rounded-md p-3 text-sm focus:bg-white focus:ring-1 focus:ring-red-100 focus:border-[#AD0100] transition-all outline-none resize-none`}
                                     />
-                                    {errors.message && <p className="text-rose-500 text-[12px] mt-1 ml-1">{errors.message}</p>}
+                                    {errors.message && <p className="text-red-500 text-[10px] mt-1">{errors.message}</p>}
                                 </div>
-                                <div className="px-6 md:px-8 py-8 flex justify-end gap-4">
-                                    <button className="flex items-center gap-3 bg-[#FF9F43] text-white pl-8 pr-3 py-3 rounded-full font-bold text-sm hover:shadow-xl hover:shadow-orange-100 transition-all active:scale-95 group">
+
+                                <div className="md:col-span-2 pt-2 flex justify-end">
+                                    <button 
+                                        type="submit"
+                                        disabled={processing}
+                                        className="w-full md:w-auto md:min-w-[180px] flex items-center justify-center gap-2 bg-[#AD0100] text-white px-8 h-11 rounded-md font-bold text-sm tracking-wide hover:opacity-90 transition-all active:scale-[0.98] disabled:opacity-50"
+                                    >
                                         Send Message
-                                        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                                         <Send className="w-4 h-4" />
-                                        </div>
+                                        <Send size={15} />
                                     </button>
                                 </div>
                             </form>

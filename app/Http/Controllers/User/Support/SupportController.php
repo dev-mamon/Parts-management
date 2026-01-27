@@ -40,4 +40,18 @@ class SupportController extends Controller
 
         return redirect()->back()->with('success', 'Message sent successfully!');
     }
+    public function terms()
+    {
+        return Inertia::render('User/Support/Terms');
+    }
+
+    public function privacy()
+    {
+        return Inertia::render('User/Support/Privacy');
+    }
+
+    public function returnPolicy()
+    {
+        return Inertia::render('User/Support/ReturnPolicy');
+    }
 }

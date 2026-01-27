@@ -90,11 +90,31 @@ export default function ConfirmAction({
         );
     }
 
-    // --- Variant: Default / Re-order Design ---
+    // --- Variant: Premium Design (Requested by User) ---
+    if (variant === "premium") {
+        return (
+            <button
+                onClick={handleClick}
+                className={`group flex items-center gap-4 bg-[#AD0100] text-white pl-8 pr-1 py-1 rounded-full font-black text-xs hover:bg-red-800 transition-all active:scale-95 uppercase tracking-widest ${className}`}
+            >
+                <span className="italic">{buttonText}</span>
+                <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                    {Icon ? <Icon className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" /> : (
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="7" y1="17" x2="17" y2="7"></line>
+                            <polyline points="7 7 17 7 17 17"></polyline>
+                        </svg>
+                    )}
+                </div>
+            </button>
+        );
+    }
+
+    // --- Variant: Default Design ---
     return (
         <button type="button" onClick={handleClick} className={className}>
             <span>{buttonText}</span>
-            {Icon && <Icon className="w-4 h-4 ml-2" />}
+            {Icon && <Icon className="w-4 h-4" />}
         </button>
     );
 }

@@ -7,7 +7,6 @@ import {
     Mail,
     Phone,
     MapPin,
-    Globe,
     Barcode,
 } from "lucide-react";
 

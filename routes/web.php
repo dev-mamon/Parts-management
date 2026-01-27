@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\Announcement\AnnouncementController as AdminAnnouncementController;
 use App\Http\Controllers\Admin\Blog\IndexController as BlogController;
 use App\Http\Controllers\Admin\Category\IndexController as CategoryController;
 use App\Http\Controllers\Admin\Lead\LeadController;
@@ -10,7 +11,7 @@ use App\Http\Controllers\Admin\Settings\EmailSettingController;
 use App\Http\Controllers\Admin\Settings\PaymentSettingController;
 use App\Http\Controllers\Admin\Settings\ProfileSettingController;
 use App\Http\Controllers\Admin\Support\SupportController as AdminSupportController;
-use App\Http\Controllers\API\User\Blog\IndexController as UserBlogController;
+// use App\Http\Controllers\API\User\Blog\IndexController as UserBlogController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\User\Booking\PaymentController;
 use App\Http\Controllers\User\Cart\IndexController as CartController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\User\Order\ActiveOrderController;
 use App\Http\Controllers\User\Order\HistoryController;
 use App\Http\Controllers\User\Order\ReturnOrderController;
 use App\Http\Controllers\User\Parts\IndexController as PartController;
+use App\Http\Controllers\User\ProfileController as UserProfileController;
 use App\Http\Controllers\User\Quote\QuoteController;
 use App\Http\Controllers\User\Support\SupportController as UserSupportController;
 use Illuminate\Foundation\Application;
@@ -115,31 +117,52 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile-settings', [ProfileSettingController::class, 'update'])->name('admin.settings.profile.update');
     Route::post('/profile-settings/password', [ProfileSettingController::class, 'updatePassword'])->name('admin.settings.profile.password');
 
+    // User Return Management (Moved up and renamed to avoid conflict with /orders/{order})
+    Route::get('/orders/my-returns', [ReturnOrderController::class, 'returnOrder'])->name('user.returns.index');
+    Route::post('/orders/my-returns/store', [ReturnOrderController::class, 'returnRequest'])->name('user.returns.store');
+
     // history
     Route::get('/orders/active', [ActiveOrderController::class, 'index'])->name('orders.active');
     // Order History
     Route::get('/orders/history', [HistoryController::class, 'index'])->name('orders.history');
+
+    // Order Details (Wildcard must come after static routes)
+    Route::get('/orders/{order}', [ActiveOrderController::class, 'show'])->name('orders.show');
+
     // reorder details
     Route::post('/orders/{order}/reorder', [HistoryController::class, 'reOrder'])
         ->name('orders.reorder');
 
-    // --return order
-    Route::get('/orders/return', [ReturnOrderController::class, 'returnOrder'])->name('orders.return');
-    // -- add return request
-    Route::post('/orders/return/request', [ReturnOrderController::class, 'returnRequest'])->name('orders.return.request');
     // Admin Support Management
     Route::get('/admin/support', [AdminSupportController::class, 'index'])->name('admin.support.index');
     Route::patch('/admin/support/{ticket}/status', [AdminSupportController::class, 'updateStatus'])->name('admin.support.status.update');
     Route::delete('/admin/support/bulk-destroy', [AdminSupportController::class, 'bulkDestroy'])->name('admin.support.bulk-destroy');
     Route::delete('/admin/support/{ticket}', [AdminSupportController::class, 'destroy'])->name('admin.support.destroy');
 
+    // Admin Announcement Management
+    Route::get('/admin/announcements', [AdminAnnouncementController::class, 'index'])->name('admin.announcements.index');
+    Route::post('/admin/announcements', [AdminAnnouncementController::class, 'store'])->name('admin.announcements.store');
+    Route::patch('/admin/announcements/{announcement}/status', [AdminAnnouncementController::class, 'updateStatus'])->name('admin.announcements.update-status');
+    Route::delete('/admin/announcements/{announcement}', [AdminAnnouncementController::class, 'destroy'])->name('admin.announcements.destroy');
+
     // User Support
     Route::get('/contact', [UserSupportController::class, 'index'])->name('contact.index');
     Route::post('/contact', [UserSupportController::class, 'store'])->name('contact.store');
+    Route::get('/terms', [UserSupportController::class, 'terms'])->name('terms.index');
+    Route::get('/privacy', [UserSupportController::class, 'privacy'])->name('privacy.index');
+    Route::get('/return-policy', [UserSupportController::class, 'returnPolicy'])->name('return-policy.index');
+
+    // User Profile Settings
+    Route::get('/settings', [UserProfileController::class, 'index'])->name('settings.index');
+    Route::post('/settings/account', [UserProfileController::class, 'updateAccount'])->name('settings.account.update');
+    Route::post('/settings/company', [UserProfileController::class, 'updateCompany'])->name('settings.company.update');
+    Route::post('/settings/password', [UserProfileController::class, 'updatePassword'])->name('settings.password.update');
+    Route::post('/settings/preferences', [UserProfileController::class, 'updatePreferences'])->name('settings.preferences.update');
+    Route::post('/settings/photo', [UserProfileController::class, 'updatePhoto'])->name('settings.photo.update');
 
     // blog
-    Route::get('/blogs', [UserBlogController::class, 'index'])->name('blogs.index');
-    Route::get('/blogs/{id}', [UserBlogController::class, 'show'])->name('blogs.show');
+    // Route::get('/blogs', [UserBlogController::class, 'index'])->name('blogs.index');
+    // Route::get('/blogs/{id}', [UserBlogController::class, 'show'])->name('blogs.show');
 });
 
 Route::fallback(function () {

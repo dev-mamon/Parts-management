@@ -75,6 +75,27 @@ export default function VerifyOTP({
         }
     };
 
+    // PASTE HANDLER: Fill all fields when a code is pasted
+    const handlePaste = (e) => {
+        e.preventDefault();
+        const pasteData = e.clipboardData.getData("text").slice(0, otp_length).split("");
+        
+        if (pasteData.length > 0) {
+            const newOtp = [...data.otp];
+            pasteData.forEach((char, i) => {
+                if (i < otp_length && /^\d$/.test(char)) {
+                    newOtp[i] = char;
+                }
+            });
+            setData("otp", newOtp);
+            setOtpError("");
+            
+            // Focus the last filled input or the first empty one
+            const nextIndex = pasteData.length < otp_length ? pasteData.length : otp_length - 1;
+            inputRefs.current[nextIndex]?.focus();
+        }
+    };
+
     const submit = (e) => {
         e?.preventDefault();
         post(route("otp.verify"), {
@@ -91,40 +112,44 @@ export default function VerifyOTP({
     return (
         <div
             className="min-h-screen py-20 flex items-center justify-center bg-cover bg-center relative font-sans"
-            style={{ backgroundImage: "url('/img/otp-bg.jpg')" }}
+            style={{ backgroundImage: "url('/img/login-bg.jpg')" }}
         >
             <div className="absolute inset-0 bg-black/60"></div>
             <Head title="Verify OTP" />
 
-            <div className="relative z-10 w-full max-w-[600px] mx-4 text-white bg-white/10 backdrop-blur-2xl border border-white/20 shadow-2xl rounded-[48px] p-10 text-center">
+            <div className="relative z-10 w-full max-w-[580px] mx-4 text-white bg-[#1A1A1A]/40 backdrop-blur-[32px] border border-white/20 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] rounded-[48px] p-10 md:p-[64px] text-center overflow-hidden">
+                {/* Decorative Hexagon Patterns */}
+                <img
+                    src="/img/10.png"
+                    className="absolute top-0 left-0 w-[240px] opacity-20 pointer-events-none"
+                    alt=""
+                />
+                <img
+                    src="/img/11.png"
+                    className="absolute top-0 right-0 w-[240px] opacity-20 pointer-events-none"
+                    alt=""
+                />
+
+                {/* Internal Radial Glow */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.05),transparent_70%)] pointer-events-none" />
+
                 <Link
                     href={route("login")}
-                    className="absolute top-8 left-8 flex items-center text-gray-200 hover:text-white transition-colors group"
+                    className="absolute top-8 left-8 flex items-center text-gray-400 hover:text-white transition-colors group z-20"
                 >
                     <LucideMoveLeft
                         size={20}
                         className="mr-2 group-hover:-translate-x-1 transition-transform"
                     />
-                    <span className="text-lg font-medium">Back</span>
+                    <span className="text-base font-medium">Back</span>
                 </Link>
 
-                <div className="mt-6 flex flex-col items-center">
-                    <img
-                        src="/img/10.png"
-                        className="absolute top-[16px] left-[22px] w-[200px] opacity-40 pointer-events-none"
-                        alt=""
-                    />
-                    <img
-                        src="/img/11.png"
-                        className="absolute top-[16px] right-[22px] w-[200px] opacity-40 pointer-events-none"
-                        alt=""
-                    />
-
-                    <img src="/img/logo.png" alt="Logo" className="h-16 mb-8" />
-                    <h2 className="text-3xl font-semibold">Verify Identity</h2>
-                    <p className="mt-2 opacity-80">
+                <div className="relative z-10 mt-6 flex flex-col items-center">
+                    <img src="/img/logo.png" alt="Logo" className="h-16 mb-6" />
+                    <h2 className="text-3xl font-bold tracking-tight">Verify Identity</h2>
+                    <p className="mt-3 text-gray-300 max-w-[320px] mx-auto leading-relaxed">
                         Enter the {otp_length}-digit code sent to <br />
-                        <span className="font-bold text-[#F2A922]">
+                        <span className="font-bold text-[#F2A922] block mt-1">
                             {maskedEmail}
                         </span>
                     </p>
@@ -145,37 +170,43 @@ export default function VerifyOTP({
                                         handleChange(index, e.target.value)
                                     }
                                     onKeyDown={(e) => handleKeyDown(index, e)}
-                                    className={`w-10 h-12 md:w-14 md:h-16 bg-black/40 border-2 rounded-xl text-center text-2xl font-bold focus:border-[#F2A922] outline-none transition-all ${
+                                    onPaste={handlePaste}
+                                    className={`w-10 h-12 md:w-14 md:h-16 bg-black/40 border-2 rounded-xl text-center text-2xl font-bold focus:border-[#F2A922] focus:ring-1 focus:ring-[#F2A922]/20 outline-none transition-all ${
                                         otpError
-                                            ? "border-red-500 shadow-lg"
-                                            : "border-white/20"
+                                            ? "border-red-500 shadow-lg shadow-red-500/10"
+                                            : "border-white/10 hover:border-white/30"
                                     }`}
                                 />
                             ))}
                         </div>
 
                         {otpError && (
-                            <p className="text-red-400 font-medium animate-pulse">
+                            <p className="text-red-400 font-medium animate-in fade-in slide-in-from-top-1">
                                 {otpError}
                             </p>
                         )}
 
                         <div className="flex flex-col items-center space-y-6">
                             <button
-                                className="w-56 h-14 bg-[#AD0100] rounded-full flex items-center justify-center transition-transform active:scale-95 disabled:opacity-50"
-                                disabled={processing}
+                                type="submit"
+                                className="group w-full max-w-[240px] h-[56px] bg-[#AD0100] hover:bg-red-700 rounded-full flex items-center justify-center shadow-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={processing || data.otp.some(d => !d)}
                             >
-                                <span className="text-lg font-bold mr-2">
-                                    {processing ? "Checking..." : "Verify Now"}
+                                <span className="text-lg font-bold mr-3">
+                                    {processing ? "Verifying..." : "Verify Now"}
                                 </span>
-                                {!processing && <LucideMoveRight size={20} />}
+                                {!processing && (
+                                    <div className="bg-white/20 p-2 rounded-full group-hover:bg-white/30 transition-colors">
+                                        <LucideMoveRight size={18} />
+                                    </div>
+                                )}
                             </button>
 
                             <div className="h-10">
                                 {timer > 0 ? (
-                                    <p className="text-gray-300">
+                                    <p className="text-gray-400 text-sm">
                                         Resend code in{" "}
-                                        <span className="text-[#F2A922] font-bold">
+                                        <span className="text-[#F2A922] font-semibold">
                                             {Math.floor(timer / 60)}:
                                             {(timer % 60)
                                                 .toString()
@@ -186,9 +217,9 @@ export default function VerifyOTP({
                                     <button
                                         type="button"
                                         onClick={handleResend}
-                                        className="flex items-center text-[#F2A922] font-bold gap-2 hover:text-white transition-colors"
+                                        className="flex items-center text-[#F2A922] font-bold text-sm gap-2 hover:text-white transition-colors"
                                     >
-                                        <LucideRefreshCcw size={18} /> Resend
+                                        <LucideRefreshCcw size={16} /> Resend
                                         OTP
                                     </button>
                                 )}

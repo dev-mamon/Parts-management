@@ -11,7 +11,7 @@ import {
 
 // --- Advanced Skeleton Component ---
 const ReturnCardSkeleton = () => (
-    <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-6 md:p-8 mb-10">
+    <div className="bg-white rounded-sm shadow-sm border border-slate-100 p-6 md:p-8 mb-10">
         <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8 pb-8 border-b border-slate-50">
             <div className="flex items-center gap-4">
                 <Skeleton className="w-14 h-14 rounded-2xl" />
@@ -58,11 +58,16 @@ const ReturnCardSkeleton = () => (
 );
 
 export default function OrderReturn() {
-    const { auth, returns, orders } = usePage().props;
-    const [isLoading, setIsLoading] = useState(true);
+    const { auth, returns, orders, selected_order_id } = usePage().props;
+    const returnList = Array.isArray(returns) ? returns : [];
+    const [isLoading, setIsLoading] = useState(returnList.length > 0);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const returnList = Array.isArray(returns) ? returns : [];
+    useEffect(() => {
+        if (selected_order_id) {
+            setIsModalOpen(true);
+        }
+    }, [selected_order_id]);
 
     useEffect(() => {
         // যদি ডাটা একদম খালি থাকে, তবে স্কেলিটন না দেখিয়ে সরাসরি এম্পটি স্টেট দেখাবো
@@ -100,14 +105,14 @@ export default function OrderReturn() {
                             <div className="flex items-center gap-3">
                                 <Link
                                     href={route('orders.history')}
-                                    className="px-5 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors flex items-center gap-2 shadow-sm"
+                                    className="px-5 py-2.5 bg-slate-800 rounded-full text-sm font-bold text-white hover:bg-slate-900 transition-colors flex items-center gap-2 shadow-sm"
                                 >
-                                    <Package className="w-4 h-4" />
+                                    <Package className="w-4 h-4 text-white" />
                                     Order History
                                 </Link>
                                 <button
                                     onClick={() => setIsModalOpen(true)}
-                                    className="bg-[#FF9F43] hover:bg-[#e68a30] text-white px-6 py-2.5 rounded-full font-black text-sm flex items-center gap-2 transition-all shadow-sm active:scale-95"
+                                    className="bg-[#AD0100] hover:bg-red-800 text-white px-6 py-2.5 rounded-full font-black text-sm flex items-center gap-2 transition-all shadow-sm active:scale-95"
                                 >
                                     <RotateCcw className="w-4 h-4" /> New Return
                                 </button>
@@ -122,7 +127,7 @@ export default function OrderReturn() {
                                 ))}
                             </div>
                         ) : returnList.length === 0 ? (
-                            <div className="bg-white p-20 rounded-[2.5rem] border border-slate-100 text-center shadow-sm">
+                            <div className="bg-white p-20 rounded-md border border-slate-100 text-center shadow-sm">
                                 <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
                                     <Box className="w-8 h-8 text-slate-200" />
                                 </div>
@@ -134,7 +139,7 @@ export default function OrderReturn() {
                                 </p>
                                 <button 
                                     onClick={() => setIsModalOpen(true)}
-                                    className="mt-8 px-8 py-3 bg-[#FF9F43] text-white rounded-full font-bold text-sm hover:shadow-lg hover:shadow-orange-200 transition-all active:scale-95 inline-block"
+                                    className="mt-8 px-8 py-3 bg-[#AD0100] text-white rounded-full font-bold text-sm hover:shadow-lg hover:shadow-red-200 transition-all active:scale-95 inline-block"
                                 >
                                     Start a new return request
                                 </button>
@@ -150,8 +155,8 @@ export default function OrderReturn() {
                                             {/* Request Header */}
                                             <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-8 pb-8 border-b border-slate-50">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center shrink-0 border border-orange-100">
-                                                        <RotateCcw className="w-7 h-7 text-[#FF9F43]" />
+                                                    <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center shrink-0 border border-red-100">
+                                                        <RotateCcw className="w-7 h-7 text-[#AD0100]" />
                                                     </div>
                                                     <div>
                                                         <div className="flex items-center gap-2 mb-1">
@@ -190,7 +195,10 @@ export default function OrderReturn() {
                                                                 <div className="flex items-center gap-3">
                                                                     <div className="w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center overflow-hidden border border-slate-100 shrink-0">
                                                                         {item.product.files?.[0] ? (
-                                                                            <img src={`/${item.product.files[0].thumbnail_path}`} className="w-full h-full object-cover" />
+                                                                            <img 
+                                                                                src={`/${item.product.files[0].thumbnail_path || item.product.files[0].file_path}`} 
+                                                                                className="w-full h-full object-cover" 
+                                                                            />
                                                                         ) : <Package className="w-5 h-5 text-slate-200" />}
                                                                     </div>
                                                                     <div className="min-w-0">
@@ -218,7 +226,7 @@ export default function OrderReturn() {
                                                             </div>
                                                         </div>
                                                         
-                                                        <div className="p-5 bg-orange-50/30 rounded-3xl border border-orange-100/50 italic">
+                                                        <div className="p-5 bg-red-50/30 rounded-3xl border border-red-100/50 italic">
                                                             <p className="text-[13px] text-slate-600 leading-relaxed font-medium">"{ret.description}"</p>
                                                         </div>
 
@@ -247,6 +255,7 @@ export default function OrderReturn() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 orders={orders}
+                selectedId={selected_order_id}
             />
         </>
     );

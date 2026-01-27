@@ -42,10 +42,10 @@ const Input = React.forwardRef(
                             Icon ? "pl-14" : "pl-5",
                             isTextArea
                                 ? "min-h-[120px] py-4 resize-none"
-                                : "h-[64px]",
+                                : "h-[56px]",
                             "disabled:cursor-not-allowed disabled:bg-white/5 disabled:text-gray-500",
                             className
-                        )}
+                        ) /* line: 48 */}
                         {...props}
                     />
                 </div>
