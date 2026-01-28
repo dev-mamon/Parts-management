@@ -157,22 +157,22 @@ export default function Dashboard({ stats, sections, categories: dynamicCategori
     const defaultCategories = [
         {
             title: "Aftermarket",
-            img: "img/Dashboard/3c617ad5f59ffa440da98ed4041a9ae8434609ca.png",
+            img: "/img/Dashboard/3c617ad5f59ffa440da98ed4041a9ae8434609ca.png",
             color: "bg-black",
         },
         {
             title: "Used Parts",
-            img: "img/Dashboard/17d63dafa7370e189f5dffe98674e135091d04b8.png",
+            img: "/img/Dashboard/17d63dafa7370e189f5dffe98674e135091d04b8.png",
             color: "bg-[#F5B52E]",
         },
         {
             title: "Interior",
-            img: "img/Dashboard/56b144518c1fddbb5095d6b2844d7c5de67f040d.png",
+            img: "/img/Dashboard/56b144518c1fddbb5095d6b2844d7c5de67f040d.png",
             color: "bg-[#B90000]",
         },
         {
             title: "All",
-            img: "img/Dashboard/ee41bae3bee280556f5a00ec4188244fc4f406ed.png",
+            img: "/img/Dashboard/ee41bae3bee280556f5a00ec4188244fc4f406ed.png",
             color: "bg-black",
         },
     ];
@@ -218,10 +218,11 @@ export default function Dashboard({ stats, sections, categories: dynamicCategori
     };
 
     return (
-        <UserLayout user={auth.user}>
+        <>
             <Head title="Dashboard" />
 
-            <div className="p-4 md:p-5 bg-[#F8F9FB] space-y-6 md:space-y-8">
+            <div className="p-4 md:p-8 bg-[#F8F9FB] min-h-screen">
+                <div className="max-w-9xl mx-auto space-y-6 md:space-y-8">
                 {/* 1. CATEGORY GRID */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                     {categories.map((cat, idx) => (
@@ -285,7 +286,7 @@ export default function Dashboard({ stats, sections, categories: dynamicCategori
                         {/* Banner Image */}
                         <div className="absolute right-0 top-1/2 -translate-y-1/2 h-full w-[40%] sm:w-[45%] lg:w-[40%] flex items-center justify-center pointer-events-none">
                             <img
-                                src="img/Dashboard/ee41bae3bee280556f5a00ec4188244fc4f406ed.png"
+                                src="/img/Dashboard/ee41bae3bee280556f5a00ec4188244fc4f406ed.png"
                                 className="w-full h-auto max-h-[80%] object-contain drop-shadow-2xl"
                                 alt="Promo Banner"
                             />
@@ -314,7 +315,7 @@ export default function Dashboard({ stats, sections, categories: dynamicCategori
                     <div className="bg-white rounded-[15px] overflow-hidden shadow-sm border border-gray-100 p-1 group">
                          <div className="relative w-full rounded-[12px] overflow-hidden">
                             <img 
-                                src={announcement.image_path} 
+                                src={`/${announcement.image_path}`} 
                                 alt={announcement.title || "Announcement"} 
                                 className="w-full h-auto block transition-transform duration-1000 group-hover:scale-[1.01]" 
                             />
@@ -328,11 +329,14 @@ export default function Dashboard({ stats, sections, categories: dynamicCategori
                     <ProductSection title="Shop Mechanical Items" products={sections?.mechanicalItems} />
                     <ProductSection title="Shop Electrical Items" products={sections?.electricalItems} />
                     <ProductSection title="Shop Accessories" products={sections?.accessories} />
-                </div>
+                    </div>
             </div>
-        </UserLayout>
+            </div>
+        </>
     );
 }
+
+Dashboard.layout = page => <UserLayout children={page} />;
 
 /**
  * StatCard Component with fixed SVG background pattern

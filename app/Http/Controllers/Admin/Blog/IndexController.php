@@ -53,12 +53,13 @@ class IndexController extends Controller
 
         if ($request->hasFile('image')) {
             // Use your Helper to upload
-            $validated['image'] = Helper::uploadFile('blogs', $request->file('image'), false);
+            $upload = Helper::uploadFile('blogs', $request->file('image'), false);
+            $validated['image'] = $upload['original'] ?? null;
         }
 
         Blog::create($validated);
 
-        return redirect()->route('blogs.index')->with('success', 'Blog created!');
+        return redirect()->route('admin.blogs.index')->with('success', 'Blog created!');
     }
 
     public function edit(Blog $blog)
@@ -83,21 +84,48 @@ class IndexController extends Controller
         if ($request->hasFile('image')) {
             Helper::deleteFile($blog->image);
 
-            $validated['image'] = Helper::uploadFile('blogs', $request->file('image'), false);
+            $upload = Helper::uploadFile('blogs', $request->file('image'), false);
+            $validated['image'] = $upload['original'] ?? null;
         } else {
             unset($validated['image']);
         }
         $blog->update($validated);
 
-        return redirect()->route('blogs.index')->with('success', 'Blog updated successfully');
+        return redirect()->route('admin.blogs.index')->with('success', 'Blog updated successfully');
     }
 
     public function destroy(Blog $blog)
     {
         // Delete the image
-        Helper::deleteFile($blog->image);
+        if ($blog->image) {
+            Helper::deleteFile($blog->image);
+        }
         $blog->delete();
 
         return redirect()->back()->with('success', 'Blog deleted');
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->ids;
+        if ($request->all) {
+            $blogs = Blog::query();
+            if ($request->search) {
+                $blogs->where('title', 'like', "%{$request->search}%")
+                    ->orWhere('content', 'like', "%{$request->search}%");
+            }
+            $blogs = $blogs->get();
+        } else {
+            $blogs = Blog::whereIn('id', $ids)->get();
+        }
+
+        foreach ($blogs as $blog) {
+            if ($blog->image) {
+                Helper::deleteFile($blog->image);
+            }
+            $blog->delete();
+        }
+
+        return redirect()->back()->with('success', 'Selected blogs deleted');
     }
 }

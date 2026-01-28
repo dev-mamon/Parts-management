@@ -68,7 +68,7 @@ class DashboardController extends Controller
                 return [
                     'id' => $cat->id,
                     'title' => $cat->name,
-                    'img' => $cat->image ? '/storage/' . $cat->image : null,
+                    'img' => $cat->image ? '/' . $cat->image : null,
                     'color' => $colors[$index % count($colors)],
                 ];
             });

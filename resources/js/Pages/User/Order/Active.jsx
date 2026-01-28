@@ -127,18 +127,16 @@ export default function Active() {
     };
 
     return (
-        <UserLayout user={auth.user}>
+        <>
             <Head title="Active Orders" />
-            <div className="p-4 md:p-6 bg-[#F8F9FB] min-h-screen">
+            <div className="p-4 md:p-8 bg-[#F8F9FB] min-h-screen">
                 <div className="max-w-9xl mx-auto">
                     {/* Header Section */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                         <div>
-                            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+                            <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
                                 Active Orders
-                                <span className="inline-flex ml-3 px-2 py-0.5 bg-red-50 text-[#AD0100] text-[9px] font-black uppercase rounded border border-red-100">
-                                    Live Tracking
-                                </span>
+                               
                             </h1>
                             <p className="text-slate-500 text-sm mt-1 font-medium">
                                 Manage your current orders in real-time.
@@ -164,7 +162,7 @@ export default function Active() {
                                  History
                              </Link>
                              <Link
-                                 href={route("user.returns.index")}
+                                 href={route("orders.returns.index")}
                                  className="hidden sm:inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-full text-xs font-black hover:bg-indigo-700 transition-colors shadow-sm uppercase tracking-wider"
                              >
                                  <RotateCcw className="w-4 h-4 text-white" />
@@ -359,6 +357,8 @@ export default function Active() {
                     )}
                 </div>
             </div>
-        </UserLayout>
+        </>
     );
 }
+
+Active.layout = page => <UserLayout children={page} />;

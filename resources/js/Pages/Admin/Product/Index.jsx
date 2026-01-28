@@ -21,7 +21,7 @@ export default function Index({ products, categories = [], subCategories = [], f
         selectedIds, toggleSelectAll, toggleSelect,
         selectAllGlobal, setSelectAllGlobal, clearSelection,
         handleFilterChange, handleClearFilters, currentFilters, performQuery,
-    } = TableManager("products.index", products.data, {
+    } = TableManager("admin.products.index", products.data, {
         ...filters,
         only: ["products", "counts"]
     });
@@ -51,7 +51,7 @@ export default function Index({ products, categories = [], subCategories = [], f
             setIsUploading(true);
             const formData = new FormData();
             formData.append("file", file);
-            router.post(route("products.import"), formData, {
+            router.post(route("admin.products.import"), formData, {
                 forceFormData: true, preserveScroll: true,
                 onFinish: () => { setIsUploading(false); performQuery(); },
             });
@@ -101,10 +101,10 @@ export default function Index({ products, categories = [], subCategories = [], f
                         <button onClick={() => fileInputRef.current.click()} disabled={isUploading || isLoading} className="flex-1 md:flex-none inline-flex items-center justify-center px-4 py-2 bg-white border border-slate-200 text-slate-700 text-[13px] font-semibold rounded-lg hover:bg-slate-50 transition-all duration-200 disabled:opacity-50">
                             <Upload size={16} className="mr-2 text-slate-400" /> Import
                         </button>
-                        <a href={route("products.export")} className="flex-1 md:flex-none inline-flex items-center justify-center px-4 py-2 bg-white border border-slate-200 text-slate-700 text-[13px] font-semibold rounded-lg hover:bg-slate-50 transition-all duration-200">
+                        <a href={route("admin.products.export")} className="flex-1 md:flex-none inline-flex items-center justify-center px-4 py-2 bg-white border border-slate-200 text-slate-700 text-[13px] font-semibold rounded-lg hover:bg-slate-50 transition-all duration-200">
                             <Download size={16} className="mr-2 text-slate-400" /> Export
                         </a>
-                        <Link href={route("products.create")} className="w-full md:w-auto inline-flex items-center justify-center px-4 py-2 bg-[#FF9F43] text-white text-[13px] font-bold rounded-lg hover:bg-[#e68a30] transition-all duration-200">
+                        <Link href={route("admin.products.create")} className="w-full md:w-auto inline-flex items-center justify-center px-4 py-2 bg-[#FF9F43] text-white text-[13px] font-bold rounded-lg hover:bg-[#e68a30] transition-all duration-200">
                             <Plus size={16} className="mr-2" /> Add Item
                         </Link>
                     </div>
@@ -207,7 +207,7 @@ export default function Index({ products, categories = [], subCategories = [], f
                                     selectAllGlobal={selectAllGlobal}
                                     totalCount={products.total}
                                     search={currentSearch}
-                                    routeName="products.bulk-destroy"
+                                    routeName="admin.products.bulk-destroy"
                                     onSuccess={clearSelection}
                                 />
                             </div>
@@ -283,8 +283,8 @@ export default function Index({ products, categories = [], subCategories = [], f
                                                 <td className="py-4 px-4">{getStatusBadge(item.visibility)}</td>
                                                 <td className="py-4 px-4 text-right pr-6">
                                                     <div className="flex justify-end items-center gap-1.5">
-                                                        <Link href={route("products.edit", item.id)} className="inline-flex items-center justify-center w-8 h-8 text-slate-400 hover:text-[#e68a30] hover:bg-white bg-transparent border border-transparent hover:border-slate-200 rounded-lg transition-all duration-200"><Pencil size={15} /></Link>
-                                                        <ConfirmDelete id={item.id} routeName="products.destroy" />
+                                                        <Link href={route("admin.products.edit", item.id)} className="inline-flex items-center justify-center w-8 h-8 text-slate-400 hover:text-[#e68a30] hover:bg-white bg-transparent border border-transparent hover:border-slate-200 rounded-lg transition-all duration-200"><Pencil size={15} /></Link>
+                                                        <ConfirmDelete id={item.id} routeName="admin.products.destroy" />
                                                     </div>
                                                 </td>
                                             </tr>

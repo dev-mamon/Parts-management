@@ -39,31 +39,44 @@ class HandleInertiaRequests extends Middleware
                 'error' => $request->session()->get('error'),
             ],
 
-            'cartCount' => auth()->user()
-                ? auth()->user()->carts()->count()
-                : 0,
+            'cart' => function () {
+                if (! auth()->user()) {
+                    return [
+                        'items' => [],
+                        'count' => 0,
+                        'subtotal' => 0,
+                    ];
+                }
 
-            'cartItems' => fn () => auth()->user()
-                ? auth()->user()->carts()->with('product.files')->get()->map(function ($item) {
+                $cartItems = auth()->user()->carts()
+                    ->with('product.files')
+                    ->get();
+
+                $mappedItems = $cartItems->map(function ($item) {
                     $firstFile = $item->product->files->first();
-                    $price = $item->product->buy_price ?? $item->product->list_price;
-
                     return [
                         'id' => $item->id,
                         'product_id' => $item->product_id,
                         'sku' => $item->product->sku,
                         'name' => $item->product->name,
                         'description' => $item->product->description,
-                        'buy_price' => $price,
+                        'buy_price' => $item->product->buy_price ?? $item->product->list_price,
                         'quantity' => $item->quantity,
                         'image' => \App\Helpers\Helper::generateURL($firstFile?->file_path),
                     ];
-                }) : [],
+                });
 
-            'cartSubtotal' => fn () => auth()->user()
-                ? auth()->user()->carts()->get()->sum(function ($item) {
-                    return ($item->product->buy_price ?? $item->product->list_price) * $item->quantity;
-                }) : 0,
+                $subtotal = $mappedItems->sum(function ($item) {
+                    return $item['buy_price'] * $item['quantity'];
+                });
+
+                return [
+                    'items' => $mappedItems,
+                    'count' => $cartItems->count(),
+                    'subtotal' => $subtotal,
+                    'total' => $subtotal,
+                ];
+            },
         ];
     }
 }

@@ -105,7 +105,7 @@ export default function Create() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route("categories.store"), {
+        post(route("admin.categories.store"), {
             onSuccess: () => reset(),
             forceFormData: true, // Ensuring multipart/form-data for files
         });
@@ -138,7 +138,7 @@ export default function Create() {
                             <Plus size={18} /> Add New Row
                         </button>
                         <Link
-                            href={route("categories.index")}
+                            href={route("admin.categories.index")}
                             className="flex items-center gap-2 bg-[#1B2838] text-white px-4 py-2 rounded-lg hover:bg-[#2c3e50] transition-all font-bold text-[13px] shadow-sm"
                         >
                             <ChevronLeft size={19} /> Back to List

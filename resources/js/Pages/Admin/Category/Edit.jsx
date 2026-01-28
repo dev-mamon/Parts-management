@@ -93,7 +93,7 @@ export default function Edit({ category }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route("categories.update", category.id), {
+        post(route("admin.categories.update", category.id), {
             forceFormData: true,
         });
     };
@@ -111,7 +111,7 @@ export default function Edit({ category }) {
                         </h1>
                     </div>
                     <Link
-                        href={route("categories.index")}
+                        href={route("admin.categories.index")}
                         className="flex items-center gap-2 bg-[#1B2838] text-white px-4 py-2 rounded-lg font-bold text-[13px] hover:bg-[#2c3e50] transition-all shadow-sm"
                     >
                         <ChevronLeft size={19} /> Back to List

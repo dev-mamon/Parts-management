@@ -1,25 +1,25 @@
 <?php
 
 use App\Http\Controllers\Admin\Announcement\AnnouncementController as AdminAnnouncementController;
-use App\Http\Controllers\Admin\Blog\IndexController as BlogController;
-use App\Http\Controllers\Admin\Category\IndexController as CategoryController;
+use App\Http\Controllers\Admin\Blog\IndexController as AdminBlogController;
+use App\Http\Controllers\Admin\Category\IndexController as AdminCategoryController;
 use App\Http\Controllers\Admin\Lead\LeadController;
 use App\Http\Controllers\Admin\Order\OrderController as AdminOrderController;
-use App\Http\Controllers\Admin\Product\IndexController as ProductController;
+use App\Http\Controllers\Admin\Product\IndexController as AdminProductController;
 use App\Http\Controllers\Admin\ReturnRequest\ReturnRequestController as AdminReturnRequestController;
 use App\Http\Controllers\Admin\Settings\EmailSettingController;
 use App\Http\Controllers\Admin\Settings\PaymentSettingController;
 use App\Http\Controllers\Admin\Settings\ProfileSettingController;
 use App\Http\Controllers\Admin\Support\SupportController as AdminSupportController;
-// use App\Http\Controllers\API\User\Blog\IndexController as UserBlogController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\User\Blog\IndexController as UserBlogController;
 use App\Http\Controllers\User\Booking\PaymentController;
-use App\Http\Controllers\User\Cart\IndexController as CartController;
-use App\Http\Controllers\User\Favourite\IndexController as FavouriteController;
+use App\Http\Controllers\User\Cart\IndexController as UserCartController;
+use App\Http\Controllers\User\Favourite\IndexController as UserFavouriteController;
 use App\Http\Controllers\User\Order\ActiveOrderController;
 use App\Http\Controllers\User\Order\HistoryController;
 use App\Http\Controllers\User\Order\ReturnOrderController;
-use App\Http\Controllers\User\Parts\IndexController as PartController;
+use App\Http\Controllers\User\Parts\IndexController as UserPartController;
 use App\Http\Controllers\User\ProfileController as UserProfileController;
 use App\Http\Controllers\User\Quote\QuoteController;
 use App\Http\Controllers\User\Support\SupportController as UserSupportController;
@@ -34,20 +34,19 @@ use Inertia\Inertia;
 |
 | This file contains all the routes for the application.
 |
-| 1. Public routes: Login page and welcome pages accessible without authentication.
-| 2. Authenticated user routes: Dashboard, profile management.
-| 3. Parts routes: List, add to cart.
-| 4. Favourite routes: Toggle and list favourite parts.
-| 5. Cart routes: User cart management.
-| 6. Checkout & payment routes: Checkout, success, and cancel URLs.
-| 7. Admin backend routes: Categories, products, blogs with bulk actions.
-| 8. Fallback route: 404 page for unmatched URLs.
-| 9. Auth routes: login, register, password reset, etc.
+| 1. Public Routes: Login and Stripe Webhook.
+| 2. Authenticated Routes: User Dashboard, Parts, Cart, and Profile.
+| 3. Admin Routes: Content and System Management with 'admin' prefix.
+| 4. Fallback: Custom 404 page.
 |
-|--------------------------------------------------------------------------
 */
 
+// --- Public Routes ---
 Route::get('/', function () {
+    if (\Illuminate\Support\Facades\Auth::check()) {
+        return redirect()->route('dashboard');
+    }
+
     return Inertia::render('Auth/Login', [
         'canLogin' => Route::has('login'),
         'canRegister' => Route::has('register'),
@@ -56,115 +55,134 @@ Route::get('/', function () {
     ]);
 });
 
-Route::middleware('auth')->group(function () {
+// Stripe Webhook (Exempt from CSRF via bootstrap/app.php)
+Route::post('/stripe/webhook', [PaymentController::class, 'webhook'])->name('stripe.webhook');
+
+// --- Authenticated User Routes ---
+Route::middleware(['auth'])->group(function () {
+
+    // User Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::post('parts/cart', [PartController::class, 'addToCart'])->name('parts.to-cart');
-    Route::resource('parts', PartController::class);
+    // User Profile & Settings
+    Route::group(['prefix' => 'settings', 'as' => 'settings.'], function () {
+        Route::get('/', [UserProfileController::class, 'index'])->name('index');
+        Route::post('/account', [UserProfileController::class, 'updateAccount'])->name('account.update');
+        Route::post('/company', [UserProfileController::class, 'updateCompany'])->name('company.update');
+        Route::post('/password', [UserProfileController::class, 'updatePassword'])->name('password.update');
+        Route::post('/preferences', [UserProfileController::class, 'updatePreferences'])->name('preferences.update');
+        Route::post('/photo', [UserProfileController::class, 'updatePhoto'])->name('photo.update');
+    });
 
-    Route::post('favourite/parts', [FavouriteController::class, 'toggle'])->name('parts.favourite');
-    Route::resource('favourites', FavouriteController::class);
+    // Parts Catalog
+    Route::post('parts/cart', [UserPartController::class, 'addToCart'])->name('parts.to-cart');
+    Route::resource('parts', UserPartController::class);
 
-    Route::post('quotes/toggle', [QuoteController::class, 'toggle'])->name('quotes.toggle');
-    Route::post('quotes/from-cart', [QuoteController::class, 'storeFromCart'])->name('quotes.store-from-cart');
-    Route::post('quotes/{quote}/convert', [QuoteController::class, 'convertToOrder'])->name('quotes.convert');
-    Route::resource('quotes', QuoteController::class);
+    // Favourites
+    Route::post('favourite/parts', [UserFavouriteController::class, 'toggle'])->name('parts.favourite');
+    Route::resource('favourites', UserFavouriteController::class);
 
-    Route::resource('carts', CartController::class);
+    // Quotes
+    Route::group(['prefix' => 'quotes', 'as' => 'quotes.'], function () {
+        Route::post('/toggle', [QuoteController::class, 'toggle'])->name('toggle');
+        Route::post('/from-cart', [QuoteController::class, 'storeFromCart'])->name('store-from-cart');
+        Route::post('/{quote}/convert', [QuoteController::class, 'convertToOrder'])->name('convert');
+    });
+    Route::resource('quotes', QuoteController::class)->except(['create', 'store']);
 
+    // Shopping Cart
+    Route::resource('carts', UserCartController::class);
+
+    // Checkout & Payments
     Route::post('/checkout', [PaymentController::class, 'checkout'])->name('checkout.process');
     Route::get('/payment/success/{order_number}', [PaymentController::class, 'success'])->name('payment.success');
     Route::get('/payment/cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
 
-    Route::delete('categories/bulk-destroy', [CategoryController::class, 'bulkDestroy'])->name('categories.bulk-destroy');
-    Route::resource('categories', CategoryController::class);
+    // User Orders & Returns
+    Route::group(['prefix' => 'orders', 'as' => 'orders.'], function () {
+        Route::get('/active', [ActiveOrderController::class, 'index'])->name('active');
+        Route::get('/history', [HistoryController::class, 'index'])->name('history');
+        Route::get('/{order}', [ActiveOrderController::class, 'show'])->name('show');
+        Route::post('/{order}/reorder', [HistoryController::class, 'reOrder'])->name('reorder');
 
-    Route::delete('products/bulk-destroy', [ProductController::class, 'bulkDestroy'])->name('products.bulk-destroy');
-    Route::get('products/export', [ProductController::class, 'export'])->name('products.export');
-    Route::delete('products/file/{file}', [ProductController::class, 'destroyFile'])->name('products.file-destroy');
-    Route::resource('products', ProductController::class);
+        // Return Management for User
+        Route::get('/my-returns/list', [ReturnOrderController::class, 'returnOrder'])->name('returns.index');
+        Route::post('/my-returns/store', [ReturnOrderController::class, 'returnRequest'])->name('returns.store');
+    });
 
-    Route::resource('admin/blogs', BlogController::class);
-
-    // Admin Orders
-    Route::get('/admin/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
-    Route::get('/admin/orders/{order}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
-    Route::patch('/admin/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.update-status');
-
-    // Admin Return Management
-    Route::get('/admin/returns', [AdminReturnRequestController::class, 'index'])->name('admin.returns.index');
-    Route::get('/admin/returns/{returnRequest}', [AdminReturnRequestController::class, 'show'])->name('admin.returns.show');
-    Route::patch('/admin/returns/{returnRequest}/status', [AdminReturnRequestController::class, 'updateStatus'])->name('admin.returns.update-status');
-
-    // Admin Lead Management
-    Route::delete('/admin/leads/bulk-destroy', [LeadController::class, 'bulkDestroy'])->name('admin.leads.bulk-destroy');
-    Route::get('/admin/leads', [LeadController::class, 'index'])->name('admin.leads.index');
-    Route::get('/admin/leads/create', [LeadController::class, 'create'])->name('admin.leads.create');
-    Route::post('/admin/leads', [LeadController::class, 'store'])->name('admin.leads.store');
-    Route::get('/admin/leads/{lead}', [LeadController::class, 'show'])->name('admin.leads.show');
-    Route::get('/admin/leads/{lead}/edit', [LeadController::class, 'edit'])->name('admin.leads.edit');
-    Route::get('/admin/leads/{lead}/invoice', [LeadController::class, 'invoice'])->name('admin.leads.invoice');
-    Route::put('/admin/leads/{lead}', [LeadController::class, 'update'])->name('admin.leads.update');
-
-    // Settings
-    Route::get('/email-settings', [EmailSettingController::class, 'index'])->name('admin.settings.email');
-    Route::post('/email-settings', [EmailSettingController::class, 'update'])->name('admin.settings.email.update');
-
-    Route::get('/payment-settings', [PaymentSettingController::class, 'index'])->name('admin.settings.payment');
-    Route::post('/payment-settings', [PaymentSettingController::class, 'update'])->name('admin.settings.payment.update');
-
-    Route::get('/profile-settings', [ProfileSettingController::class, 'index'])->name('admin.settings.profile');
-    Route::post('/profile-settings', [ProfileSettingController::class, 'update'])->name('admin.settings.profile.update');
-    Route::post('/profile-settings/password', [ProfileSettingController::class, 'updatePassword'])->name('admin.settings.profile.password');
-
-    // User Return Management (Moved up and renamed to avoid conflict with /orders/{order})
-    Route::get('/orders/my-returns', [ReturnOrderController::class, 'returnOrder'])->name('user.returns.index');
-    Route::post('/orders/my-returns/store', [ReturnOrderController::class, 'returnRequest'])->name('user.returns.store');
-
-    // history
-    Route::get('/orders/active', [ActiveOrderController::class, 'index'])->name('orders.active');
-    // Order History
-    Route::get('/orders/history', [HistoryController::class, 'index'])->name('orders.history');
-
-    // Order Details (Wildcard must come after static routes)
-    Route::get('/orders/{order}', [ActiveOrderController::class, 'show'])->name('orders.show');
-
-    // reorder details
-    Route::post('/orders/{order}/reorder', [HistoryController::class, 'reOrder'])
-        ->name('orders.reorder');
-
-    // Admin Support Management
-    Route::get('/admin/support', [AdminSupportController::class, 'index'])->name('admin.support.index');
-    Route::patch('/admin/support/{ticket}/status', [AdminSupportController::class, 'updateStatus'])->name('admin.support.status.update');
-    Route::delete('/admin/support/bulk-destroy', [AdminSupportController::class, 'bulkDestroy'])->name('admin.support.bulk-destroy');
-    Route::delete('/admin/support/{ticket}', [AdminSupportController::class, 'destroy'])->name('admin.support.destroy');
-
-    // Admin Announcement Management
-    Route::get('/admin/announcements', [AdminAnnouncementController::class, 'index'])->name('admin.announcements.index');
-    Route::post('/admin/announcements', [AdminAnnouncementController::class, 'store'])->name('admin.announcements.store');
-    Route::patch('/admin/announcements/{announcement}/status', [AdminAnnouncementController::class, 'updateStatus'])->name('admin.announcements.update-status');
-    Route::delete('/admin/announcements/{announcement}', [AdminAnnouncementController::class, 'destroy'])->name('admin.announcements.destroy');
-
-    // User Support
+    // User Support & Legal
     Route::get('/contact', [UserSupportController::class, 'index'])->name('contact.index');
     Route::post('/contact', [UserSupportController::class, 'store'])->name('contact.store');
     Route::get('/terms', [UserSupportController::class, 'terms'])->name('terms.index');
     Route::get('/privacy', [UserSupportController::class, 'privacy'])->name('privacy.index');
     Route::get('/return-policy', [UserSupportController::class, 'returnPolicy'])->name('return-policy.index');
 
-    // User Profile Settings
-    Route::get('/settings', [UserProfileController::class, 'index'])->name('settings.index');
-    Route::post('/settings/account', [UserProfileController::class, 'updateAccount'])->name('settings.account.update');
-    Route::post('/settings/company', [UserProfileController::class, 'updateCompany'])->name('settings.company.update');
-    Route::post('/settings/password', [UserProfileController::class, 'updatePassword'])->name('settings.password.update');
-    Route::post('/settings/preferences', [UserProfileController::class, 'updatePreferences'])->name('settings.preferences.update');
-    Route::post('/settings/photo', [UserProfileController::class, 'updatePhoto'])->name('settings.photo.update');
-
-    // blog
-    // Route::get('/blogs', [UserBlogController::class, 'index'])->name('blogs.index');
-    // Route::get('/blogs/{id}', [UserBlogController::class, 'show'])->name('blogs.show');
+    // User Blogs
+    Route::get('/blogs', [UserBlogController::class, 'index'])->name('blogs.index');
+    Route::get('/blogs/{id}', [UserBlogController::class, 'show'])->name('blogs.show');
 });
 
+// --- Admin Backend Routes ---
+Route::middleware(['auth'])->prefix('admin')->as('admin.')->group(function () {
+
+    // Categories Management
+    Route::delete('categories/bulk-destroy', [AdminCategoryController::class, 'bulkDestroy'])->name('categories.bulk-destroy');
+    Route::resource('categories', AdminCategoryController::class);
+
+    // Products Management
+    Route::group(['prefix' => 'products', 'as' => 'products.'], function () {
+        Route::delete('/bulk-destroy', [AdminProductController::class, 'bulkDestroy'])->name('bulk-destroy');
+        Route::get('/export', [AdminProductController::class, 'export'])->name('export');
+        Route::delete('/file/{file}', [AdminProductController::class, 'destroyFile'])->name('file-destroy');
+    });
+    Route::resource('products', AdminProductController::class);
+
+    // Admin Blogs
+    Route::delete('blogs/bulk-destroy', [AdminBlogController::class, 'bulkDestroy'])->name('blogs.bulk-destroy');
+    Route::resource('blogs', AdminBlogController::class);
+
+    // Admin Orders
+    Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+    Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
+
+    // Admin Returns
+    Route::get('/returns', [AdminReturnRequestController::class, 'index'])->name('returns.index');
+    Route::get('/returns/{returnRequest}', [AdminReturnRequestController::class, 'show'])->name('returns.show');
+    Route::patch('/returns/{returnRequest}/status', [AdminReturnRequestController::class, 'updateStatus'])->name('returns.update-status');
+
+    // Admin Lead Management
+    Route::delete('leads/bulk-destroy', [LeadController::class, 'bulkDestroy'])->name('leads.bulk-destroy');
+    Route::resource('leads', LeadController::class);
+    Route::get('leads/{lead}/invoice', [LeadController::class, 'invoice'])->name('leads.invoice');
+
+    // Support Management
+    Route::group(['prefix' => 'support', 'as' => 'support.'], function () {
+        Route::get('/', [AdminSupportController::class, 'index'])->name('index');
+        Route::patch('/{ticket}/status', [AdminSupportController::class, 'updateStatus'])->name('status.update');
+        Route::delete('/bulk-destroy', [AdminSupportController::class, 'bulkDestroy'])->name('bulk-destroy');
+        Route::delete('/{ticket}', [AdminSupportController::class, 'destroy'])->name('destroy');
+    });
+
+    // Announcements
+    Route::resource('announcements', AdminAnnouncementController::class)->except(['show', 'edit', 'update']);
+    Route::patch('announcements/{announcement}/status', [AdminAnnouncementController::class, 'updateStatus'])->name('announcements.update-status');
+
+    // System Settings
+    Route::group(['prefix' => 'settings', 'as' => 'settings.'], function () {
+        Route::get('/email', [EmailSettingController::class, 'index'])->name('email');
+        Route::post('/email', [EmailSettingController::class, 'update'])->name('email.update');
+
+        Route::get('/payment', [PaymentSettingController::class, 'index'])->name('payment');
+        Route::post('/payment', [PaymentSettingController::class, 'update'])->name('payment.update');
+
+        Route::get('/profile', [ProfileSettingController::class, 'index'])->name('profile');
+        Route::post('/profile', [ProfileSettingController::class, 'update'])->name('profile.update');
+        Route::post('/profile/password', [ProfileSettingController::class, 'updatePassword'])->name('profile.password');
+    });
+});
+
+// --- Fallback Route ---
 Route::fallback(function () {
     return Inertia::render('Errors/404');
 });

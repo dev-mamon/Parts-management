@@ -30,15 +30,16 @@ export default function Contact() {
     };
 
     return (
-        <UserLayout user={auth.user}>
+        <>
             <Head title="Contact Support" />
 
-            <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header */}
-                <div className="mb-6">
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Customer Support</h1>
-                    <p className="text-slate-500 text-sm mt-0.5">We're here to help. Send us a message and we'll respond as soon as possible.</p>
-                </div>
+            <div className="p-4 md:p-8 bg-[#F8F9FB] min-h-screen">
+                <div className="max-w-9xl mx-auto">
+                    {/* Header */}
+                    <div className="mb-8">
+                        <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight uppercase">Customer Support</h1>
+                        <p className="text-slate-500 font-medium tracking-tight">We're here to help. Send us a message and we'll respond as soon as possible.</p>
+                    </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                     
@@ -207,7 +208,10 @@ export default function Contact() {
                     </div>
 
                 </div>
+                </div>
             </div>
-        </UserLayout>
+        </>
     );
 }
+
+Contact.layout = page => <UserLayout children={page} />;

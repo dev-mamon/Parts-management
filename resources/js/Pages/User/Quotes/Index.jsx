@@ -103,13 +103,14 @@ export default function Index({ quotes }) {
     };
 
     return (
-        <UserLayout user={auth.user}>
+        <>
             <Head title="Saved Quotes" />
             <div className="p-4 md:p-8 bg-[#F8FAFC] min-h-screen">
-                <div className="mb-8">
-                    <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Saved Quotes</h1>
-                    <p className="text-slate-500 mt-1 text-sm font-medium">Manage and convert your saved parts quotations seamlessly.</p>
-                </div>
+                <div className="max-w-9xl mx-auto">
+                    <div className="mb-8">
+                        <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Saved Quotes</h1>
+                        <p className="text-slate-500 mt-1 text-sm font-medium">Manage and convert your saved parts quotations seamlessly.</p>
+                    </div>
 
                 {isLoading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -215,6 +216,7 @@ export default function Index({ quotes }) {
                         </Link>
                     </div>
                 )}
+                </div>
             </div>
 
             <QuoteDetailsModal 
@@ -222,6 +224,8 @@ export default function Index({ quotes }) {
                 onClose={() => setIsModalOpen(false)}
                 quote={selectedQuote}
             />
-        </UserLayout>
+        </>
     );
 }
+
+Index.layout = page => <UserLayout children={page} />;

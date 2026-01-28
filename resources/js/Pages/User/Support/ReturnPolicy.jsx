@@ -20,11 +20,12 @@ export default function ReturnPolicy() {
     ];
 
     return (
-        <UserLayout>
+        <>
             <Head title="Return Policy" />
 
-            <div className="max-w-9xl mx-auto px-4 py-6">
-                <div className="bg-white rounded-md border border-slate-100 shadow-sm p-8 md:p-12">
+            <div className="p-4 md:p-8 bg-[#F8F9FB] min-h-screen">
+                <div className="max-w-9xl mx-auto">
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 md:p-12">
                     {/* Header */}
                     <div className="flex items-center gap-4 mb-10">
                         <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center">
@@ -58,7 +59,10 @@ export default function ReturnPolicy() {
                         </section>
                     </div>
                 </div>
+                </div>
             </div>
-        </UserLayout>
+        </>
     );
 }
+
+ReturnPolicy.layout = page => <UserLayout children={page} />;

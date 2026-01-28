@@ -92,7 +92,7 @@ export default function Create({ categories, subCategories }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route("products.store"), {
+        post(route("admin.products.store"), {
             forceFormData: true,
             onSuccess: () => reset(),
         });
@@ -112,7 +112,7 @@ export default function Create({ categories, subCategories }) {
                         <p className="text-slate-500 text-[12px] mt-0.5">Add a new item to your inventory catalog.</p>
                     </div>
                     <Link
-                        href={route("products.index")}
+                        href={route("admin.products.index")}
                         className="inline-flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-slate-600 shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all"
                     >
                         <ChevronLeft size={14} /> Back
@@ -296,7 +296,7 @@ export default function Create({ categories, subCategories }) {
                             <h3 className="text-[13px] font-bold text-slate-800 mb-3 flex items-center justify-between">
                                 <span>Category</span>
                                 <Link
-                                    href={route("categories.create")}
+                                    href={route("admin.categories.create")}
                                     className="text-[9px] font-bold text-slate-500 hover:text-[#FF9F43] bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded"
                                 >
                                     Add New

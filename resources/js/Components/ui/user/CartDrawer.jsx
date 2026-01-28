@@ -5,12 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
 
 const CartDrawer = ({ isOpen, onClose }) => {
-    const { cartItems, cartSubtotal, auth } = usePage().props;
+    const { cart } = usePage().props;
+    const cartItems = cart?.items || [];
+    const cartSubtotal = cart?.subtotal || 0;
 
     // Refresh cart items when open
     useEffect(() => {
         if (isOpen) {
-            router.reload({ only: ["cartItems", "cartSubtotal"] });
+            router.reload({ only: ["cart"] });
         }
     }, [isOpen]);
 

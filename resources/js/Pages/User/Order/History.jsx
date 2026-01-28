@@ -117,14 +117,14 @@ export default function OrderHistory() {
     };
 
     return (
-        <UserLayout user={auth.user}>
+        <>
             <Head title="Order History" />
-            <div className="p-4 md:p-6 bg-[#F8F9FB] min-h-screen">
+            <div className="p-4 md:p-8 bg-[#F8F9FB] min-h-screen">
                 <div className="max-w-9xl mx-auto">
                     {/* Header & Search */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
                         <div>
-                            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+                            <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
                                 Order History
                             </h1>
                             <p className="text-slate-500 text-sm mt-1 font-medium">
@@ -151,7 +151,7 @@ export default function OrderHistory() {
                                  Active
                              </Link>
                              <Link
-                                 href={route("user.returns.index")}
+                                 href={route("orders.returns.index")}
                                  className="hidden sm:inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-full text-xs font-black hover:bg-indigo-700 transition-colors shadow-sm uppercase tracking-wider"
                              >
                                  <RotateCcw className="w-4 h-4 text-white" />
@@ -295,7 +295,7 @@ export default function OrderHistory() {
                                             </button>
                                             {order.status === 'delivered' && (
                                                  <Link
-                                                     href={route('user.returns.index', { order_id: order.id })}
+                                                     href={route('orders.returns.index', { order_id: order.id })}
                                                      className="px-6 py-2.5 bg-red-50 border border-red-100 rounded-full text-[10px] font-black text-[#AD0100] hover:bg-red-100 transition-all shadow-sm uppercase tracking-widest flex items-center gap-2"
                                                  >
                                                      <RotateCcw className="w-3 h-3" />
@@ -320,6 +320,8 @@ export default function OrderHistory() {
                     )}
                 </div>
             </div>
-        </UserLayout>
+        </>
     );
 }
+
+OrderHistory.layout = page => <UserLayout children={page} />;

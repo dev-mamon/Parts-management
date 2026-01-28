@@ -77,10 +77,11 @@ export default function SettingsPage() {
     ];
 
     return (
-        <UserLayout user={auth.user}>
+        <>
             <Head title="Settings" />
 
-            <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="p-4 md:p-8 bg-[#F8F9FB] min-h-screen">
+                <div className="max-w-9xl mx-auto">
                 <div className="flex flex-col lg:flex-row gap-8">
                     
                     {/* Sidebar Card */}
@@ -473,6 +474,9 @@ export default function SettingsPage() {
 
                 </div>
             </div>
-        </UserLayout>
+        </div>
+        </>
     );
 }
+
+SettingsPage.layout = page => <UserLayout children={page} />;

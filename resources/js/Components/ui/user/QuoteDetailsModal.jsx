@@ -66,7 +66,7 @@ export default function QuoteDetailsModal({ isOpen, onClose, quote }) {
                                     <div className="w-16 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-white border border-slate-100 flex items-center justify-center">
                                         {item.product?.files?.[0]?.file_path ? (
                                             <img
-                                                src={`/storage/${item.product.files[0].file_path}`}
+                                                src={`/${item.product.files[0].file_path}`}
                                                 className="w-full h-full object-cover"
                                                 alt={item.product?.name}
                                             />

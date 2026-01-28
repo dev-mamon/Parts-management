@@ -34,7 +34,7 @@ class OrderService
             $tax = 0;
             $totalAmount = $subtotal + $tax;
 
-            $orderNumber = 'ORD-' . strtoupper(Str::random(8));
+            $orderNumber = 'ORD-'.strtoupper(Str::random(8));
 
             $order = Order::create([
                 'user_id' => $user->id,
@@ -43,7 +43,7 @@ class OrderService
                 'tax' => $tax,
                 'total_amount' => $totalAmount,
                 'status' => 'pending',
-                'shipping_address' => $user->address ?? 'N/A', 
+                'shipping_address' => $user->address ?? 'N/A',
                 'notes' => $data['notes'] ?? null,
             ]);
 
@@ -60,7 +60,7 @@ class OrderService
             Payment::create([
                 'order_id' => $order->id,
                 'user_id' => $user->id,
-                'transaction_id' => 'TRX-' . strtoupper(Str::random(12)),
+                'transaction_id' => 'TRX-'.strtoupper(Str::random(12)),
                 'amount' => $totalAmount,
                 'currency' => 'USD',
                 'status' => 'pending',

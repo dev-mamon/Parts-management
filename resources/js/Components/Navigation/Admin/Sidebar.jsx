@@ -23,7 +23,9 @@ import {
 const Sidebar = ({ isCollapsed, isMobileOpen, setIsMobileOpen }) => {
     const { url } = usePage();
     const [openMenus, setOpenMenus] = useState({
+        leads: false,
         products: false,
+        blogs: false,
         settings: false,
     });
 
@@ -45,124 +47,117 @@ const Sidebar = ({ isCollapsed, isMobileOpen, setIsMobileOpen }) => {
     const menuItems = [
         {
             label: "Dashboard",
-            path: "/dashboard",
+            path: route("dashboard"),
             icon: <LayoutDashboard size={18} />,
         },
-        { label: "Orders", path: "/admin/orders", icon: <ShoppingCart size={18} /> },
+        {
+            label: "Orders",
+            path: route("admin.orders.index"),
+            icon: <ShoppingCart size={18} />,
+        },
         {
             label: "Categories",
-            path: "/categories",
+            path: route("admin.categories.index"),
             icon: <List size={18} />,
         },
-        { label: "Returns", path: "/admin/returns", icon: <RefreshCw size={18} /> },
+        {
+            label: "Returns",
+            path: route("admin.returns.index"),
+            icon: <RefreshCw size={18} />,
+        },
         {
             label: "Leads",
-            path: "/admin/leads",
+            path: route("admin.leads.index"),
             icon: <Users size={18} />,
             key: "leads",
             children: [
                 {
                     label: "All Leads",
-                    path: "/admin/leads",
+                    path: route("admin.leads.index"),
                     icon: <List size={14} />,
                 },
                 {
                     label: "Add Lead",
-                    path: "/admin/leads/create",
+                    path: route("admin.leads.create"),
                     icon: <PlusCircle size={14} />,
                 },
             ],
         },
-        {
-            label: "Sales - B2C",
-            path: "/sales-b2c",
-            icon: <BarChart2 size={18} />,
-        },
-        {
-            label: "Customers - B2B",
-            path: "/customers-b2b",
-            icon: <Users size={18} />,
-        },
+        // {
+        //     label: "Sales - B2C",
+        //     path: "#",
+        //     icon: <BarChart2 size={18} />,
+        // },
+        // {
+        //     label: "Customers - B2B",
+        //     path: "#",
+        //     icon: <Users size={18} />,
+        // },
         {
             label: "Products",
-            path: "/products",
+            path: route("admin.products.index"),
             icon: <Tag size={18} />,
             key: "products",
             children: [
                 {
                     label: "All Products",
-                    path: "/products",
+                    path: route("admin.products.index"),
                     icon: <List size={14} />,
                 },
                 {
                     label: "Add Product",
-                    path: "/products/create",
+                    path: route("admin.products.create"),
                     icon: <PlusCircle size={14} />,
                 },
             ],
         },
         {
             label: "Blogs",
-            path: "/admin/blogs",
-            icon: <Tag size={18} />,
+            path: route("admin.blogs.index"),
+            icon: <FileText size={18} />,
             key: "blogs",
             children: [
                 {
                     label: "All Blogs",
-                    path: "/admin/blogs",
+                    path: route("admin.blogs.index"),
                     icon: <List size={14} />,
                 },
                 {
                     label: "Add Blog",
-                    path: "/admin/blogs/create",
+                    path: route("admin.blogs.create"),
                     icon: <PlusCircle size={14} />,
                 },
             ],
         },
-        // {
-        //     label: "Create Invoice",
-        //     path: "/invoice/create",
-        //     icon: <FileText size={18} />,
-        // },
-        // {
-        //     label: "Analytics",
-        //     path: "/analytics",
-        //     icon: <BarChart2 size={18} />,
-        // },
         {
             label: "Support Tickets",
-            path: "/admin/support",
+            path: route("admin.support.index"),
             icon: <Headset size={18} />,
         },
         {
             label: "Announcements",
-            path: "/admin/announcements",
+            path: route("admin.announcements.index"),
             icon: <ImageIcon size={18} />,
         },
         {
             label: "Settings",
-            path: "/settings",
+            path: route("admin.settings.profile"),
             icon: <Settings size={18} />,
             key: "settings",
             children: [
                 {
                     label: "Profile Settings",
-                    path: "/profile-settings",
-                    icon: <UserCircle size={14} />,
-                },
-                {
-                    label: "Account Settings",
-                    path: "/account-settings",
+                    path: route("admin.settings.profile"),
                     icon: <UserCircle size={14} />,
                 },
                 {
                     label: "Email Settings",
-                    path: "/email-settings",
+                    path: route("admin.settings.email"),
                     icon: <Mail size={14} />,
                 },
                 {
                     label: "Payment Settings",
-                    path: "/payment-settings",
+                    path: route("admin.settings.payment"),
                     icon: <CreditCard size={14} />,
                 },
             ],
@@ -204,10 +199,24 @@ const Sidebar = ({ isCollapsed, isMobileOpen, setIsMobileOpen }) => {
 
                 <div className="space-y-1">
                     {menuItems.map((item) => {
-                        const currentPath = url.split('?')[0];
+                        const currentPath = url.split("?")[0];
+                        const getPathname = (path) => {
+                            try {
+                                return path.startsWith("http")
+                                    ? new URL(path).pathname
+                                    : path;
+                            } catch (e) {
+                                return path;
+                            }
+                        };
+
+                        const itemPath = getPathname(item.path);
                         const isActive = item.children
-                            ? item.children.some((child) => currentPath === child.path)
-                            : currentPath === item.path;
+                            ? item.children.some(
+                                  (child) =>
+                                      currentPath === getPathname(child.path)
+                              )
+                            : currentPath === itemPath;
 
                         return item.children ? (
                             <SidebarItem
@@ -224,17 +233,19 @@ const Sidebar = ({ isCollapsed, isMobileOpen, setIsMobileOpen }) => {
                                     <div className="mt-1 space-y-1 ml-4 border-l border-gray-100">
                                         {item.children.map((child) => (
                                             <Link
-                                                key={child.path}
+                                                key={child.label}
                                                 href={child.path}
                                                 className={`flex items-center gap-3 ml-4 py-2 px-3 rounded-md text-sm transition-all ${
-                                                    currentPath === child.path
+                                                    currentPath ===
+                                                    getPathname(child.path)
                                                         ? "text-[#FF9F43] font-semibold bg-[#FF9F43]/10"
                                                         : "text-slate-500 hover:text-[#FF9F43] hover:bg-gray-50"
                                                 }`}
                                             >
                                                 <span
                                                     className={`${
-                                                        url === child.path
+                                                        currentPath ===
+                                                        getPathname(child.path)
                                                             ? "text-[#FF9F43]"
                                                             : "text-slate-400"
                                                     }`}

@@ -39,7 +39,7 @@ export default function Edit({ blog }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route("blogs.update", blog.id), {
+        post(route("admin.blogs.update", blog.id), {
             forceFormData: true,
         });
     };
@@ -61,7 +61,7 @@ export default function Edit({ blog }) {
                         </p>
                     </div>
                     <Link
-                        href={route("blogs.index")}
+                        href={route("admin.blogs.index")}
                         className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg font-bold text-[13px] shadow-sm hover:bg-gray-50 transition-all"
                     >
                         <ChevronLeft size={19} /> Back to List
@@ -219,7 +219,7 @@ export default function Edit({ blog }) {
                                 {processing ? "Updating..." : "Update Post"}
                             </button>
                             <Link
-                                href={route("blogs.index")}
+                                href={route("admin.blogs.index")}
                                 className="w-full flex items-center justify-center gap-2 bg-[#1B2838] text-white py-3 rounded-xl hover:bg-[#2c3e50] transition-all font-bold"
                             >
                                 <XCircle size={20} /> Cancel

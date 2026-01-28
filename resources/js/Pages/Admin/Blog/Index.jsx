@@ -29,7 +29,7 @@ export default function Index({ blogs }) {
         selectAllGlobal,
         setSelectAllGlobal,
         clearSelection,
-    } = TableManager("blogs.index", blogs?.data || [], {
+    } = TableManager("admin.blogs.index", blogs?.data || [], {
         only: ["blogs"]
     });
 
@@ -57,7 +57,7 @@ export default function Index({ blogs }) {
                     </div>
 
                     <Link
-                        href={route("blogs.create")}
+                        href={route("admin.blogs.create")}
                         className="bg-[#FF9F43] text-white px-4 py-2 rounded-md font-bold text-[13px] flex items-center gap-2 hover:bg-[#e68a2e] transition-colors shadow-sm"
                     >
                         <Plus size={16} /> Create New Blog
@@ -102,7 +102,7 @@ export default function Index({ blogs }) {
                                     selectAllGlobal={selectAllGlobal}
                                     totalCount={blogs?.total || 0}
                                     search={search}
-                                    routeName="blogs.bulk-destroy"
+                                    routeName="admin.blogs.bulk-destroy"
                                     onSuccess={clearSelection}
                                 />
                             </div>
@@ -290,7 +290,7 @@ export default function Index({ blogs }) {
                                                     <div className="flex justify-end gap-2">
                                                         <Link
                                                             href={route(
-                                                                "blogs.edit",
+                                                                "admin.blogs.edit",
                                                                 item.id
                                                             )}
                                                             className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 border border-slate-200 rounded-lg shadow-sm transition-all"
@@ -299,7 +299,7 @@ export default function Index({ blogs }) {
                                                         </Link>
                                                         <ConfirmDelete
                                                             id={item.id}
-                                                            routeName="blogs.destroy"
+                                                            routeName="admin.blogs.destroy"
                                                         />
                                                     </div>
                                                 </td>

@@ -12,7 +12,7 @@ import {
 
 const Header = ({ onMenuClick, onCartClick }) => {
     const { props } = usePage();
-    const cartCount = props.cartCount || 0;
+    const cartCount = props.cart?.count || 0;
     const user = props.auth.user;
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);

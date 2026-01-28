@@ -56,7 +56,7 @@ const FavoriteCard = memo(({ fav, quantity, onQuantityChange, onAddToCart, onDel
             </div>
 
             {/* Content Container - Compact Padding */}
-            <div className="p-4 flex-1 flex flex-col">
+            <div className="p-4 flex-1 flex flex-col">  
                 <div className="mb-3">
                     <div className="flex items-center gap-2 mb-1">
                         <span className="text-[10px] font-black text-[#AD0100] uppercase tracking-tighter bg-red-50 px-2 py-0.5 rounded">SKU</span>
@@ -202,15 +202,16 @@ export default function Index() {
     };
 
     return (
-        <UserLayout user={auth.user}>
+        <>
             <Head title="My Favorites" />
-            <div className="p-6 bg-[#F8F9FB] min-h-screen">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">
-                        My Favorites
-                    </h1>
-                    <p className="text-slate-500 font-medium tracking-tight">Manage your saved parts and add them to cart easily.</p>
-                </div>
+            <div className="p-4 md:p-8 bg-[#F8F9FB] min-h-screen">
+                <div className="max-w-9xl mx-auto">
+                    <div className="mb-8">
+                        <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
+                            My Favorites
+                        </h1>
+                        <p className="text-slate-500 font-medium tracking-tight">Manage your saved parts and add them to cart easily.</p>
+                    </div>
 
                 {!isLoading && favourites.data.length === 0 ? (
                     <div className="flex flex-col items-center justify-center min-h-[50vh] text-center bg-white rounded-md border border-slate-100 p-10 shadow-sm">
@@ -250,8 +251,11 @@ export default function Index() {
                         }
                     </div>
                 )}
+                </div>
             </div>
-        </UserLayout>
+        </>
     );
 }
+
+Index.layout = page => <UserLayout children={page} />;
 

@@ -40,7 +40,7 @@ export default function Create() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route("blogs.store"), {
+        post(route("admin.blogs.store"), {
             forceFormData: true,
             onSuccess: () => reset(),
         });
@@ -63,7 +63,7 @@ export default function Create() {
                         </p>
                     </div>
                     <Link
-                        href={route("blogs.index")}
+                        href={route("admin.blogs.index")}
                         className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition font-bold text-[13px] shadow-sm"
                     >
                         <ChevronLeft size={19} /> Back to Blogs

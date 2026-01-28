@@ -1,12 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "../Components/Navigation/User/Header";
 import Sidebar from "../Components/Navigation/User/Sidebar";
 import CartDrawer from "../Components/ui/user/CartDrawer";
+import { usePage } from "@inertiajs/react";
 import { Menu, X } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function UserLayout({ children }) {
+    const { url } = usePage();
     const [isMobileOpen, setIsMobileOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
+
+    // Close mobile menu on page change
+    useEffect(() => {
+        setIsMobileOpen(false);
+    }, [url]);
 
     return (
         <div className="flex min-h-screen bg-[#F9F9F9] font-sans">
@@ -53,10 +61,19 @@ export default function UserLayout({ children }) {
                     </div>
                 </div>
 
-                <main className="flex-1 p-0">
-                    <div className="w-full min-w-0">
+                <main className="flex-1 p-0 overflow-x-hidden">
+                    <motion.div
+                        key={url}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ 
+                            duration: 0.3, 
+                            ease: [0.22, 1, 0.36, 1] // Custom quint ease for premium feel
+                        }}
+                        className="w-full min-w-0"
+                    >
                         {children}
-                    </div>
+                    </motion.div>
                 </main>
             </div>
 

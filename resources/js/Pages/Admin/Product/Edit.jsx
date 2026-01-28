@@ -74,7 +74,7 @@ export default function Edit({ product, categories, subCategories }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(route("products.update", product.id), {
+        post(route("admin.products.update", product.id), {
             forceFormData: true,
             preserveScroll: true,
         });
@@ -94,7 +94,7 @@ export default function Edit({ product, categories, subCategories }) {
                         <p className="text-slate-500 text-[13px] mt-1">Modify existing product details and specifications.</p>
                     </div>
                     <Link
-                        href={route("products.index")}
+                        href={route("admin.products.index")}
                         className="inline-flex items-center gap-2 bg-white border border-slate-200 px-4 py-2 rounded-xl text-[13px] font-semibold text-slate-600 shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all"
                     >
                         <ChevronLeft size={16} /> Back to Inventory
@@ -504,7 +504,7 @@ export default function Edit({ product, categories, subCategories }) {
                                             <div className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <ConfirmDelete
                                                     id={file.id}
-                                                    routeName="products.file-destroy"
+                                                    routeName="admin.products.file-destroy"
                                                     title="Delete Image?"
                                                     text="Are you sure you want to delete this image permanently?"
                                                 />

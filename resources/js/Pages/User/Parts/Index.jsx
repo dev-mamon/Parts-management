@@ -410,14 +410,15 @@ export default function Index() {
     );
 
     return (
-        <UserLayout user={auth.user}>
+        <>
             <Head title="Shop Parts" />
             <div className="p-4 md:p-8 bg-[#F8FAFC] min-h-screen font-sans">
-                {/* Header Title */}
-                <div className="mb-6 md:mb-10 text-center md:text-left">
-                    <h1 className="text-xl md:text-4xl font-black text-slate-900 tracking-tight">Shop Parts</h1>
-                    <p className="text-slate-500 mt-2 text-sm md:text-base font-medium">Browse and order thousands of high-quality auto parts.</p>
-                </div>
+                <div className="max-w-9xl mx-auto">
+                    {/* Header Title */}
+                    <div className="mb-6 md:mb-10 text-center md:text-left">
+                        <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight">Shop Parts</h1>
+                        <p className="text-slate-500 mt-2 text-sm md:text-base font-medium">Browse and order thousands of high-quality auto parts.</p>
+                    </div>
 
                 {/* Filter Bar */}
                 <div className="flex flex-col xl:flex-row gap-4 mb-8">
@@ -523,7 +524,8 @@ export default function Index() {
                             </div>
                         </div>
                     )}
-                </div>
+                    </div>
+            </div>
             </div>
 
             <ProductDetailsModal 
@@ -532,6 +534,8 @@ export default function Index() {
                 onClose={handleCloseModal}
                 onToggleFavorite={handleToggleFavorite}
             />
-        </UserLayout>
+        </>
     );
 }
+
+Index.layout = page => <UserLayout children={page} />;

@@ -30,7 +30,7 @@ export default function ReturnRequestModal({ isOpen, onClose, orders, selectedId
 
     const submit = (e) => {
         e.preventDefault();
-        post(route("user.returns.store"), {
+        post(route("orders.returns.store"), {
             forceFormData: true,
             onSuccess: () => {
                 reset();

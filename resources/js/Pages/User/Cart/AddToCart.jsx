@@ -8,7 +8,8 @@ import { useState, useCallback } from "react";
 import { toast } from "react-hot-toast";
 
 export default function AddToCart() {
-    const { auth, cartItems, subtotal, total } = usePage().props;
+    const { auth, cart } = usePage().props;
+    const { items: cartItems, subtotal, total } = cart || { items: [], subtotal: 0, total: 0 };
 
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -51,20 +52,20 @@ export default function AddToCart() {
     };
 
     return (
-        <UserLayout user={auth.user}>
+        <>
             <Head title="Shopping Cart" />
 
-            <div className="bg-[#FBFBFC] min-h-screen pb-10 text-sm">
-                <div className="max-w-8xl mx-auto px-4 md:px-8">
+            <div className="bg-[#FBFBFC] min-h-screen pb-10 text-sm p-4 md:p-8">
+                <div className="max-w-9xl mx-auto">
                     {/* Header Section */}
-                    <div className="flex items-center gap-3 pt-6 mb-4">
+                    <div className="flex items-center gap-3 mb-8">
                         <Link
                             href={route("parts.index")}
                             className="p-1.5 hover:bg-white rounded-full transition-colors border border-transparent hover:border-slate-200"
                         >
                             <ChevronLeft size={18} />
                         </Link>
-                        <h1 className="text-xl font-bold text-slate-900 lg:text-xl lg:font-bold lg:uppercase-none">
+                        <h1 className="text-2xl font-black text-slate-900 tracking-tight">
                             Your Shopping Cart
                         </h1>
                     </div>
@@ -270,6 +271,8 @@ export default function AddToCart() {
                 onClose={handleCloseModal}
                 onToggleFavorite={handleToggleFavorite}
             />
-        </UserLayout>
+        </>
     );
 }
+
+AddToCart.layout = page => <UserLayout children={page} />;

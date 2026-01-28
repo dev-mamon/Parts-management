@@ -35,11 +35,11 @@ export default function Show({ auth, order }) {
     };
 
     return (
-        <UserLayout user={auth.user}>
+        <>
             <Head title={`Order Details #${order.order_number}`} />
 
-            <div className="p-4 md:p-6 bg-[#F8F9FB] min-h-screen">
-                <div className="max-w-7xl mx-auto">
+            <div className="p-4 md:p-8 bg-[#F8F9FB] min-h-screen">
+                <div className="max-w-9xl mx-auto">
                     {/* Header Section */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
                         <div>
@@ -231,6 +231,8 @@ export default function Show({ auth, order }) {
                     </div>
                 </div>
             </div>
-        </UserLayout>
+        </>
     );
 }
+
+Show.layout = page => <UserLayout children={page} />;
